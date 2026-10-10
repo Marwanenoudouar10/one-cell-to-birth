@@ -22,7 +22,8 @@ export const tailGeo = (p: Pose, grow: number, cut: number): TailGeo => {
   const { end, dir, a } = p.tail;
   const base = add(end, mul(dir, -0.6 * a));
   const hidden = 1.3 * a; // length still inside the rump's round cap
-  const len = lerp(hidden, lerp(hidden, LEN, grow), 1 - cut);
+  const buried = 0.6 * hidden; // grow 0 / cut 1: fully inside the rump (C07 has no tail tip)
+  const len = lerp(buried, lerp(buried, LEN, grow), 1 - cut);
   const a0 = (Math.atan2(dir.y, dir.x) * 180) / Math.PI + BEND;
   const wb = 0.92 * a;
   const wt = 4.8;

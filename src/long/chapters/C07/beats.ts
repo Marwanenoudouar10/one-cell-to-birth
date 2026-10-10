@@ -29,7 +29,7 @@ export const BEATS = {
   legPaddle: s(1.4), // free: the leg paddle a beat later
   grown: s(1.76), // sync: "its" (1.76): paddles formed (kit ~6.85), head swollen
   // --- "its very first move."
-  spark: s(2.42), // sync: "first" (2.42): a glint runs down the spinal cord
+  spark: s(2.42), // sync: "first" (2.42): a glint runs down the spinal cord, reaching the rump as the bend starts
   firstMove: s(2.84), // sync: "move" (2.86): the first sideways bend of head + rump
   // --- "A tiny wiggle,"
   wiggle: s(4.1), // sync: "wiggle" (4.10): a second, smaller bend (no wind-up: the first
@@ -37,7 +37,7 @@ export const BEATS = {
   // --- "months before anyone can feel it."
   pullBack: s(4.94), // sync: "months" (4.94): camera eases back, the sac small in the womb
   wide: s(6.05), // free (between "anyone" and "can"): wide shot settled, wall + camera still
-  twitch: s(6.42), // sync: "feel" (6.44): one tiny flick inside; the wall does not stir
+  twitch: s(6.42), // sync: "feel" (6.44): one flick inside (peaks 6.63, on "feel"); the wall does not stir
   pushIn: s(7.05), // free: after "it" (6.86-6.94) and the flick has settled, a slow push-in
   //                 begins (C08 lands it)
   exit: DURATION - OVERLAP, // free (231): C08 fades in on top; glows/rings fade 1 -> 0

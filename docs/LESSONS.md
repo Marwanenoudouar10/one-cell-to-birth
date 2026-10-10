@@ -358,3 +358,6 @@ Scores: C02 6.5->7.8, C03 7->8, C04 6.5->7.8, C05 6.5->8, C06 6.5->8 (builders s
 | Tracker WEEK lands before its spoken word | C02, C03, C06 | orchestrator re-timed weekKeys | 24 |
 | Upstream changed mid-build | C03 changed TILT while C04 copied it; C05 END changed while C06 built | polish re-copied and re-diffed against the final upstream | 25 |
 | Captions wrap to 3 rows | C03, C04, C06 | (orchestrator) paginate long lines by phrase | 9 |
+| Voice clips bleed into neighbours (a chapter's clip holds the next chapter's first words, or loses its last words) | C07/C08, C09/C10, C13/C14, C14/C15 | (orchestrator) re-cut at real pauses; verify by transcribing EVERY clip's first/last words | CLAUDE.md audio: after cutting VO clips, transcribe each clip and compare first/last words with the captions |
+| Kit shapes read as animals at phone size | C06, C07 (week 6-7 embryo = duckling: round head, dot eye, red heart like a bill) | flagged for a kit-level fix | 11 |
+| Concentric backdrop rings read as a target / frozen ripples | C07 wide shot (womb kit fold rings) | flagged for a kit-level fix | 12 |
