@@ -1,7 +1,7 @@
 # birth-teaser: guide for Claude
 
 Vertical motion-graphics explainer of human development, from fertilisation to birth.
-Remotion 4.0.534, React 19, TypeScript. 1080x1920 at 30 fps, flat 2D Kurzgesagt-like look. Not a git repo.
+Remotion 4.0.534, React 19, TypeScript. 1080x1920 at 30 fps, flat 2D Kurzgesagt-like look. Git repo: github.com/Marwanenoudouar10/birth-teaser (public).
 - **Main**: the 30 s teaser in `src/scenes/Scene1..5`. Done: `out/final/teaser-30s.mp4` (music still missing).
 - **Long**: about 2:29, made of a C00 hook plus chapters C01-C16 in `src/long/`. Status and next steps are in `RESUME.md`.
 
@@ -81,7 +81,8 @@ ffmpeg -y -loglevel error -i out/raw.mp4 -c:v copy -af "loudnorm=I=-14:TP=-1.5:L
 16. **Science.** Store every fact as {claim, GA week from LMP, primary source}. Run a separate adversarial fact-check agent. No on-screen % without a primary source. Every polish pass includes a biology check.
 17. **Pacing.** VO at 2.1 words/s or less overall (2.3 per chapter), one idea per chapter. Each visual beat lasts at least 0.7 s, each week label at least 1.4 s.
 18. **SFX files.** The first sample is 0 and there is a single onset. Apply a 3-10 ms fade-in AFTER any filters, and `asetpts` after `atrim`. The tail goes below -60 dBFS. Work in 32-bit float.
-19. **Mix for phones.** On every word the voice beats SFX by at least 6 dB in 1-4 kHz. SFX need body at 120-600 Hz. `volume={f=>...}` uses clip-local frames, and ducks land about 2 frames late.
+19. **Voice clips: verify the cuts.** After splitting a take into chapter clips, transcribe EVERY clip and check its first and last words against the captions; whisper word times drift 0.3-0.5 s, so cut only at real pauses (lowest energy).
+19b. **Mix for phones.** On every word the voice beats SFX by at least 6 dB in 1-4 kHz. SFX need body at 120-600 Hz. `volume={f=>...}` uses clip-local frames, and ducks land about 2 frames late.
 20. **Kits vs teaser code.** Copy teaser scene code into chapters (never import `src/scenes`). When a shared kit lacks a feature, add it to the kit API instead of copying its internals.
 21. **Reuse the pilot, don't rebuild it.** When a chapter matches a finished scene (C03/C04 <- Scene2, C06 <- Scene3, C09/C11 <- Scene4, C16 <- Scene5), keep at least 80% of that scene's code and look; change only timing and the storyboard's new parts. Future projects: build the pilot's scenes with their timing passed in as props (beats object), not read from a global teaser file, so a longer cut can mount them directly instead of copying and re-adapting.
 

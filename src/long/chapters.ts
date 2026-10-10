@@ -47,7 +47,7 @@ export const CHAPTERS = [
   { id: "C04", title: "A message to mum", durationSec: 8.5, transition: "fade", weekKeys: [[0.3, 2 + 4 * D], [0.6, 2 + 5 * D], [2.45, 2 + 5 * D], [2.75, 3], [6.85, 4]] },
   { id: "C05", title: "Three layers", durationSec: 9.2, transition: "focus", weekKeys: [] },
   { id: "C06", title: "First heartbeats", durationSec: 8.5, transition: "fade", weekKeys: [[0.35, 5], [5.6, 6]] },
-  { id: "C07", title: "First move", durationSec: 8.2, transition: "fade", weekKeys: [[0, 7]] },
+  { id: "C07", title: "First move", durationSec: 8.2, transition: "fade", weekKeys: [[0.58, 7]] },
   { id: "C08", title: "Webbing and tail", durationSec: 7.5, transition: "fade", weekKeys: [[0.05, 8], [4.55, 9]] },
   { id: "C09", title: "Fetus", durationSec: 9.5, transition: "focus", weekKeys: [[0.15, 10], [4.45, 11], [6.05, 12]] },
   { id: "C10", title: "Hands of its own", durationSec: 10.5, transition: "fade", weekKeys: [[0, 13], [1.5, 14], [3.0, 15], [4.5, 16], [6.0, 17]] },

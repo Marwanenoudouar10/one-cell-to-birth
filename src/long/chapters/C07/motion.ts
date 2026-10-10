@@ -66,7 +66,7 @@ const soften = (u: number, k: number) => (u < 0 ? k * u : u);
 export const poseAt = (f: number): Pose => ({
   head: 24 * soften(bendAt(f), 0.6),
   rump: -28 * bendAt(f - 3),
-  nod: 12 * soften(bendAt(f - 1), 0.25),
+  nod: 5 * soften(bendAt(f - 1), 0.25),
   arm: 18 * bendAt(f - 5),
   leg: -13 * bendAt(f - 6),
   headWeek: headWeek(f),
