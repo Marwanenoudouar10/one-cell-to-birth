@@ -364,3 +364,4 @@ Scores: C02 6.5->7.8, C03 7->8, C04 6.5->7.8, C05 6.5->8, C06 6.5->8 (builders s
 | Small body part too small in its own close-up | C08 hand at 16% of frame width (42 px on a phone) during "fingers/webbed" | camera rebuilt to frame the PART (not the whole body) at 35%+ | 11 (the subject of the beat, not the character, gets 35%) |
 | Animal read on a body part | C08 bulbous fingertip pads = frog/gecko foot | tapered digits; web a different tone from the digits | 11 |
 | Screen-space shade with a hard edge | C08 top shade showed a horizontal line across the head | 8-stop eased falloff | 14 |
+| Word-to-chapter assignment drifted, so builders synced to wrong word times | C04 (0.2-0.8 s), C02/C03/C06 (0.2-0.4 s) | vo_repair.py: cut at the lowest-energy point between chapters, then onsets measured per clip (mean error 22 ms on 73 hand-checked words) | Build chapters only AFTER the voice clips pass a transcript check; never trust whisper word times inside a phrase |

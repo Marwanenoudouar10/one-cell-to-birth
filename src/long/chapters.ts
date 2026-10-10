@@ -49,7 +49,7 @@ export const CHAPTERS = [
   { id: "C06", title: "First heartbeats", durationSec: 8.5, transition: "fade", weekKeys: [[0.35, 5], [5.6, 6]] },
   { id: "C07", title: "First move", durationSec: 8.2, transition: "fade", weekKeys: [[0.58, 7]] },
   { id: "C08", title: "Webbing and tail", durationSec: 7.5, transition: "fade", weekKeys: [[0.05, 8], [4.55, 9]] },
-  { id: "C09", title: "Fetus", durationSec: 9.5, transition: "focus", weekKeys: [[0.15, 10], [4.45, 11], [6.05, 12]] },
+  { id: "C09", title: "Fetus", durationSec: 10.0, transition: "focus", weekKeys: [[0.15, 10], [4.45, 11], [6.05, 12]] },
   { id: "C10", title: "Hands of its own", durationSec: 10.5, transition: "fade", weekKeys: [[0, 13], [1.5, 14], [3.0, 15], [4.5, 16], [6.0, 17]] },
   { id: "C11", title: "The first kick she feels", durationSec: 9.5, transition: "focus", weekKeys: [[0, 18], [1.5, 19], [3.0, 20]] },
   { id: "C12", title: "The senses wake", durationSec: 13.0, transition: "focus", weekKeys: [[0, 21], [1.3, 22], [2.7, 23], [4.1, 24], [5.5, 25], [6.9, 26], [8.3, 27]] },

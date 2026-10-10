@@ -10,13 +10,25 @@
  * Duration = the chapter's full length (including its transition overlaps).
  */
 import React from "react";
-import { AbsoluteFill, Composition, Sequence } from "remotion";
+import { AbsoluteFill, Audio, Composition, Sequence, staticFile } from "remotion";
 import { Grain } from "../../overlays/Grain";
 import { FPS, HEIGHT, WIDTH } from "../../theme/layout";
 import { ChapterId, LONG_START, LONG_TOTAL, chapterFrames, chapterSpec } from "../chapters";
 import { BackgroundLong } from "../overlays/BackgroundLong";
 import { LongOverlays } from "../overlays/LongOverlays";
 import { placeholderFor } from "../Placeholder";
+import { VO_TIMING } from "../data/voTiming";
+
+// The chapter's own voice clip, so previews can be watched with sound.
+const Voice: React.FC<{ id: ChapterId }> = ({ id }) => {
+  const v = VO_TIMING[id];
+  if (!v) return null;
+  return (
+    <Sequence from={Math.round(v.clipAt * FPS)} layout="none">
+      <Audio src={staticFile(v.src)} />
+    </Sequence>
+  );
+};
 
 export const ChapterPreview: React.FC<{ id: ChapterId; Chapter: React.FC }> = ({ id, Chapter }) => {
   const start = LONG_START[id];
@@ -30,6 +42,7 @@ export const ChapterPreview: React.FC<{ id: ChapterId; Chapter: React.FC }> = ({
         <LongOverlays />
       </Sequence>
       <Grain />
+      <Voice id={id} />
     </AbsoluteFill>
   );
 };
