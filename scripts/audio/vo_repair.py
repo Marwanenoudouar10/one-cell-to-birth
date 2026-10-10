@@ -12,8 +12,9 @@ finding the current clip bit-exactly inside its take) and never touches chapters
      into the neighbour's speech; bit-exact samples, 12 ms linear fade-in, 55 ms fade-out.
      clipAt = new head cut + shift, so every word stays where it was heard in the film.
   3. Word onsets: measured inside each final clip (vo_onsets.py: whisper DTW guide
-     snapped to the 10 ms energy envelope). Line start = first onset, line end = last
-     sound before the next line's first onset (or the clip end).
+     snapped to the 10 ms energy envelope), then the hand-measured FIX onsets replace the
+     words the aligner gets wrong (report column: H). Line start = first onset, line end =
+     last sound of the line's last word (FIX_END where a breath followed it).
   4. Writes src/long/data/voTiming.ts (same format and header) and
      briefs/long/vo-words.md, and prints the report: cuts, what whisper hears at the
      head and tail of each new clip, level before/after the speech, max word move,
@@ -47,6 +48,37 @@ HEADER = (
     "// speech and each word's start (same word order as the caption text in lines.ts).\n"
     "export type VoLine = { start: number; end: number; words: number[] };\n"
     "export const VO_TIMING: Record<string, { src: string; clipAt: number; lines: VoLine[] }> = ")
+# Hand-measured onsets (chapter-local s) where vo_onsets.py missed by 40-400 ms: a breath taken
+# for the word, a dip or closure inside the next word taken as its start, or a fricative pair
+# (ch+s, ts+f, s+s) split late. Measured on 1.5 ms/px spectrograms (voiced 80-1000 Hz and
+# fricative 3-8 kHz envelopes, spectral centroid) and confirmed with whisper cut tests (the
+# clip cut just before / after the boundary: which words are still heard). Stop-initial words
+# sit on the burst. Rerun-safe because the chapter mapping never moves (clipAt + t is fixed).
+# FIX[cid] = {word index: (caption word, onset)}; the word check fails if the captions change.
+FIX = {
+    "C00": {2: ("ever", 0.60), 16: ("cell,", 5.82), 19: ("a", 7.27), 21: ("of", 7.69)},
+    "C01": {2: ("with", 1.09), 4: ("race.", 1.47), 12: ("obstacle", 4.39), 15: ("one", 6.09)},
+    "C02": {8: ("from", 3.38), 9: ("the", 3.52)},
+    "C03": {11: ("cell", 6.45)},
+    "C04": {2: ("hollow", 1.66), 7: ("the", 3.49), 13: ("message:", 4.77), 14: ("the", 5.78),
+            17: ("pregnancy", 6.63)},
+    "C05": {6: ("layers.", 2.85)},
+    "C06": {2: ("a", 1.77), 8: ("to", 3.235), 9: ("squeeze,", 3.325)},
+    "C07": {11: ("anyone", 5.80)},
+    "C08": {3: ("fingers", 1.715), 6: ("and", 2.855), 7: ("it", 2.95)},
+    "C09": {2: ("every", 2.27), 5: ("is", 3.30)},
+    "C10": {5: ("thumb.", 4.06), 7: ("seventeen:", 4.965), 11: ("life,", 7.55), 15: ("an", 9.10),
+            16: ("identical", 9.20)},
+    "C11": {4: ("mother", 4.355), 9: ("the", 5.595)},
+    "C12": {5: ("its", 3.87), 6: ("mother's", 4.05), 11: ("rumbling.", 5.85), 21: ("And", 11.71),
+            22: ("it", 11.82), 23: ("blinks.", 11.98)},
+    "C13": {2: ("its", 4.455)},
+    "C15": {5: ("mother's", 2.425), 10: ("and", 4.475)},
+    "C16": {13: ("in", 7.85), 22: ("cell", 10.95), 25: ("a", 11.90), 26: ("whole", 11.95),
+            28: ("human.", 12.81)},
+}
+# Line ends that ran on into the breath before the next line: FIX_END[cid] = {line index: end}.
+FIX_END = {"C05": {1: 5.37, 2: 7.11}, "C06": {0: 5.27}, "C08": {0: 4.35}}
 
 
 def pcm(path):
@@ -152,14 +184,20 @@ def plan_cuts(chs, lines, old, tmp):
 
 
 def measure(cid, clip, at, lines, tmp):
-    """voTiming entry for one final clip + (whisper words, methods, envelope)."""
-    on, how, heard, env = O.onsets(clip, words_of(lines, cid), tmp)
+    """voTiming entry for one final clip + (whisper words, methods, envelope); FIX/FIX_END applied."""
+    words = words_of(lines, cid)
+    on, how, heard, env = O.onsets(clip, words, tmp)
+    auto = list(on)  # line ends are found from the aligner's own onsets (FIX moves no line end)
+    for k, (w, t) in FIX.get(cid, {}).items():
+        assert words[k] == w, f"{cid} word {k} is {words[k]!r}, FIX expects {w!r}: captions changed, re-measure"
+        on[k], how[k] = t - at, "H"
+    assert all(a < b for a, b in zip(on, on[1:])), f"{cid}: onsets out of order after FIX"
     lns, k = [], 0
-    for ln in lines[cid]:
+    for i, ln in enumerate(lines[cid]):
         n = len(ln["text"].split(" "))
-        nxt = on[k + n] - 0.02 if k + n < len(on) else len(env) * HOP
-        lns.append({"start": round(at + on[k], 3), "end": round(at + O.last_sound(env, on[k + n - 1], nxt), 3),
-                    "words": [round(at + w, 3) for w in on[k:k + n]]})
+        nxt = auto[k + n] if k + n < len(on) else len(env) * HOP
+        end = FIX_END.get(cid, {}).get(i, round(at + O.word_end(env, auto[k + n - 1], nxt), 3))
+        lns.append({"start": round(at + on[k], 3), "end": end, "words": [round(at + w, 3) for w in on[k:k + n]]})
         k += n
     return {"src": f"vo/long/{cid}.wav", "clipAt": at, "lines": lns}, heard, how, env
 
@@ -214,7 +252,10 @@ def write_outputs(out, lines):
     md = ["# Real voice timings (chapter-LOCAL seconds) — generated from the ElevenLabs takes", "",
           "Use these to time your beats.ts: each `// sync: \"<word>\"` beat should land on (or just before) the word below.",
           "Onsets are measured in each chapter's own clip by scripts/audio/vo_repair.py (whisper DTW guide snapped "
-          "to the 10 ms energy envelope, ~25 ms typical error); a line ends at its last word's last sound."]
+          "to the 10 ms energy envelope; the words it got wrong are hand-measured on spectrograms, see FIX). "
+          "Stop-initial words sit on the burst. All onsets were checked against spectrograms and whisper cut tests "
+          "(target: within 2 frames, 0.067 s); "
+          "a line ends at its last word's last sound."]
     for cid, v in out.items():
         md += ["", f"## {cid}"]
         for i, (ln, vl) in enumerate(zip(lines[cid], v["lines"])):

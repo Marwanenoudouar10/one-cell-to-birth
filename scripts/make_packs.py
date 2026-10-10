@@ -29,6 +29,21 @@ def end_state(sec):
     return m.group(0).strip() if m else "(see storyboard)"
 
 
+def live_end(cid):
+    """The finished upstream chapter's real END: briefs/long/ends/<id>.md (from its polish
+    review), else the END block in its beats.ts."""
+    e = os.path.join(B, "ends", f"{cid}.md")
+    if os.path.exists(e):
+        return open(e).read()
+    p = os.path.join(ROOT, "src", "long", "chapters", cid, "beats.ts")
+    if not os.path.exists(p):
+        return "(no beats.ts yet)"
+    lines = open(p).read().splitlines()
+    idx = [i for i, l in enumerate(lines) if re.search(r"END\b", l) and ("contract" in l.lower() or "C0" in l or "C1" in l)]
+    start = idx[0] if idx else max(0, len(lines) - 60)
+    return "\n".join(lines[start:start + 90])
+
+
 def main(ids):
     sb = open(os.path.join(B, "storyboard.md")).read()
     chap = sections(sb, r"^## (C\d\d) ·")
@@ -45,7 +60,7 @@ def main(ids):
                  "## Your storyboard section\n", chap[cid], "\n"]
         if prev:
             parts += [f"## Previous chapter {prev}: its END (your frame 0 must match it; the orchestrator does one final pixel pass over all joins, so match the numbers, don't pixel-chase)\n",
-                      end_state(chap[prev]), f"\nIts live code: src/long/chapters/{prev}/ (END contract usually at the bottom of beats.ts).\n"]
+                      "Storyboard plan (may be OUTDATED):", end_state(chap[prev]), "\nACTUAL END of the finished chapter (this wins; code in src/long/chapters/" + prev + "/):\n", live_end(prev), "\n"]
         if nxt:
             parts += [f"## Next chapter {nxt}: how it starts (your END must hand over to this)\n", chap[nxt][:1800], "\n"]
         parts += ["## Real voice word timings (chapter-local seconds, measured from the audio — trust these)\n",

@@ -50,3 +50,19 @@
 - SPEED-UP (21:00, same quality bar): chapter packs (scripts/make_packs.py -> briefs/long/packs/), range renders (FRAMES=a-b), joins matched by numbers during build + ONE final pixel join pass by the orchestrator, 3 agents at a time. Workflow: scripts/workflows/birth-long-chapter-v2.js. Regenerate packs AFTER the VO repair (vo-words.md changes).
 - FINAL JOIN PASS TODO: for every cut Cn->Cn+1, composite END-20..END+5, pixel-diff, fix.
 - C08 polished 6 -> 8 (21:35). Real C08 END: zoom ~2.36-2.55 big side view, kit week 8.99 size 374 at (472,835), embryo ~900 px tall — C09 must start from THIS (storyboard END text is outdated).
+
+## STOPPED 2026-10-10 ~22:30 — resume next week from here
+Done: C00-C08 built + polished (scores 7.6-8.2). Voice clips repaired + verified (scripts/audio/vo_repair.py + vo_onsets.py;
+backups in out/_archive/vo-long-pre-repair/). NEVER rerun long_vo.py alone again (it reintroduces the bleed) — run vo_repair.py after it.
+Voice now plays in the Long film (data/audio.ts LONG_VOICE) and in every chapter preview (makeChapterRoot).
+Rough cut with voice: out/final/review/long-C00-C08-roughcut.mp4 (chapter previews stitched, no crossfades).
+C09 duration 9.5 -> 10.0 (its last words "a face." moved into it). Packs for C09-C16 regenerated with the repaired timings.
+
+NEXT WEEK, in this order:
+1. Re-time beats of built chapters to the repaired word times (each beat has // sync: "<word>"; compare with briefs/long/vo-words.md):
+   C04 (animation 0.2-0.8 s AHEAD of the voice: every beat), C02, C03, C06 (0.2-0.4 s), C01/C05/C07/C08 small. One agent, chapter by chapter, range renders.
+2. Build + polish C09-C16 with scripts/workflows/birth-long-chapter-v2.js (packs, range renders, 3 at a time).
+   Reuse: C09/C11 <- Scene4, C16 <- Scene5. C13 + C15 have half-built code with type errors (expected).
+3. Kit fixes once C09+ are done: embryo week 6-7 'duckling' read; womb backdrop fold rings read as a target.
+4. Captions: paginate long lines (max 2 rows); tracker weekKeys per chapter on the spoken week word.
+5. Final join pass (pixel-diff every cut), SFX + womb bed + music (user still has to make the music: 2:30 prompt in ElevenLabs-guide-long.html or Gemini/Lyria), master -14 LUFS, render, QA.
