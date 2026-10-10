@@ -26,7 +26,8 @@ export const BEATS = {
   grow: s(0.35), // free: kit 7.0 -> 7.5 (GA 7.5 -> 8) while the camera pushes in
   quicken: s(0.5), // sync: "Week" (0.52): the heart starts racing toward its week-9 peak
   grown: s(1.5), // free: kit 7.5 reached, hand plate fully ours
-  pushEnd: s(1.8), // free: the push-in lands on the big side view as "fingers" starts
+  pushEnd: s(1.8), // free: heart quickening + wrist turn + tail growth complete as "fingers" starts
+  handShot: s(2.15), // free: the dive lands on the hand close-up (between "fingers" and "webbed")
   // --- "its fingers are webbed,"
   ringOn: s(1.76), // sync: "fingers" (1.81): a gold ring draws itself round the hand
   rays: s(2.31), // sync: "webbed" (2.36): five finger rays glow inside the webbing
@@ -39,12 +40,14 @@ export const BEATS = {
   // --- "Both fade away,"
   dissolve: s(4.78), // sync: "Both" (4.82): webbing + tail tip turn to gold dust
   dissolveEnd: s(5.31), // sync: "away" (5.31): fingers free, tail gone
-  uncurl: s(4.78), // sync: "Both": kit 7.5 -> 8.99, body lengthens and uncurls a little
+  uncurl: s(4.98), // free: kit 7.5 -> 8.99, body lengthens and uncurls a little once the
+  //                 dust is flying (the hand holds still while its web starts to go)
   uncurlEnd: s(5.9), // free
   // --- "right on cue."
   toHand: s(5.93), // sync: "right" (5.97): camera leans in on the free fingers
   flex: s(6.38), // sync: "cue" (6.42): the stubby fingers flex once, peaking on "cue"
   // --- END: free fingers, no tail; focus starts to soften for C09's focus pull
+  release: s(6.7), // free: flex peak passed; camera breathes back to the whole embryo (no tail)
   soften: s(6.9), // free
   exit: DURATION - OVERLAP, // free (210): C09 focus-pulls in on top
   end: DURATION, // free: last frame + 1

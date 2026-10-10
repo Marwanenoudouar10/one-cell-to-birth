@@ -361,3 +361,6 @@ Scores: C02 6.5->7.8, C03 7->8, C04 6.5->7.8, C05 6.5->8, C06 6.5->8 (builders s
 | Voice clips bleed into neighbours (a chapter's clip holds the next chapter's first words, or loses its last words) | C07/C08, C09/C10, C13/C14, C14/C15 | (orchestrator) re-cut at real pauses; verify by transcribing EVERY clip's first/last words | CLAUDE.md audio: after cutting VO clips, transcribe each clip and compare first/last words with the captions |
 | Kit shapes read as animals at phone size | C06, C07 (week 6-7 embryo = duckling: round head, dot eye, red heart like a bill) | flagged for a kit-level fix | 11 |
 | Concentric backdrop rings read as a target / frozen ripples | C07 wide shot (womb kit fold rings) | flagged for a kit-level fix | 12 |
+| Small body part too small in its own close-up | C08 hand at 16% of frame width (42 px on a phone) during "fingers/webbed" | camera rebuilt to frame the PART (not the whole body) at 35%+ | 11 (the subject of the beat, not the character, gets 35%) |
+| Animal read on a body part | C08 bulbous fingertip pads = frog/gecko foot | tapered digits; web a different tone from the digits | 11 |
+| Screen-space shade with a hard edge | C08 top shade showed a horizontal line across the head | 8-stop eased falloff | 14 |
