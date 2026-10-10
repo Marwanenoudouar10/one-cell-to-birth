@@ -14,8 +14,8 @@ import { Pose, handToWorld, poseAt } from "./kit";
 import { tailGeo } from "./tail";
 
 const D0 = BEATS.dissolve;
-const DUR = BEATS.dissolveEnd - BEATS.dissolve - 7;
-const ORDER = [5, 0, 3, 7]; // valley start offsets (frames): middle gaps open first
+const DUR = BEATS.dissolveEnd - BEATS.dissolve - 4; // ~0.4 s per gap, all free on "away"
+const ORDER = [3, 0, 2, 4]; // valley start offsets (frames): middle gaps open first
 const NO_FLEX = [0, 0, 0, 0, 0];
 
 export const frontAt = (f: number, j: number) => tween(f, D0 + ORDER[j], D0 + ORDER[j] + DUR, [0, 1], EASE.inOut);
@@ -49,7 +49,7 @@ const handGrain = (g: (typeof HAND_GRAINS)[number]): Grain => {
   const at = valleyPt(p, g.j, frontAt(fs, g.j), (random(`${g.s}a`) - 0.5) * 12, (random(`${g.s}r`) - 0.5) * 0.12);
   const dir = p.hand.ang + valleyAngle(g.j, NO_FLEX) + (random(`${g.s}v`) - 0.5) * 70;
   const sp = 0.23 + 0.48 * random(`${g.s}s`);
-  return { fs, at, v: rot({ x: sp, y: 0 }, dir), life: 20 + 16 * random(`${g.s}l`), r: 1.5 + 1.3 * random(`${g.s}z`), warm: random(`${g.s}c`) > 0.3 };
+  return { fs, at, v: rot({ x: sp, y: 0 }, dir), life: 20 + 16 * random(`${g.s}l`), r: 1.9 + 1.3 * random(`${g.s}z`), warm: random(`${g.s}c`) > 0.3 };
 };
 
 const tailGrain = (g: (typeof TAIL_GRAINS)[number]): Grain => {
@@ -59,7 +59,7 @@ const tailGrain = (g: (typeof TAIL_GRAINS)[number]): Grain => {
   const at = add(p.toWorld(tg.tip), { x: (random(`${g.s}x`) - 0.5) * 4, y: (random(`${g.s}y`) - 0.5) * 4 });
   const a = (Math.atan2(tg.tip.y - tg.base.y, tg.tip.x - tg.base.x) * 180) / Math.PI + (random(`${g.s}v`) - 0.5) * 80;
   const sp = 0.2 + 0.42 * random(`${g.s}s`);
-  return { fs, at, v: rot({ x: sp, y: 0 }, a), life: 20 + 16 * random(`${g.s}l`), r: 1.4 + 1.2 * random(`${g.s}z`), warm: random(`${g.s}c`) > 0.3 };
+  return { fs, at, v: rot({ x: sp, y: 0 }, a), life: 20 + 16 * random(`${g.s}l`), r: 1.8 + 1.2 * random(`${g.s}z`), warm: random(`${g.s}c`) > 0.3 };
 };
 
 // built once per render process (they only depend on the timeline)
@@ -75,7 +75,7 @@ const Mote: React.FC<{ g: Grain; f: number; i: number }> = ({ g, f, i }) => {
   const p = add(g.at, drift);
   return (
     <g opacity={o}>
-      <circle cx={p.x} cy={p.y} r={g.r * 3.2} fill={C.gold} opacity={0.2} />
+      <circle cx={p.x} cy={p.y} r={g.r * 3.2} fill={C.gold} opacity={0.28} />
       <circle cx={p.x} cy={p.y} r={g.r} fill={g.warm ? C.gold : C.text} />
     </g>
   );

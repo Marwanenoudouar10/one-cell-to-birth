@@ -29,6 +29,22 @@ export const Spotlight: React.FC<{ at: Pt; r: number; o: number }> = ({ at, r: r
   );
 };
 
+// Screen-space band under the week tracker (y 100-290) for the close-ups, where the
+// cropped head fills it: a womb-rose MULTIPLY (rule 13: a dark normal overlay greys skin),
+// so the head darkens to deep wine and the tracker text stays crisp.
+export const TopShade: React.FC<{ o: number }> = ({ o }) =>
+  o > 0.005 ? (
+    <AbsoluteFill
+      style={{
+        opacity: Math.min(1, o),
+        mixBlendMode: "multiply",
+        // a long eased falloff (no visible edge across the head)
+        background: `linear-gradient(180deg, ${C.wombDeep}f0 0px, ${C.wombDeep}e6 170px, ${C.wombDeep}cc 240px, ${C.wombDeep}a0 300px, ${C.wombDeep}6c 360px, ${C.wombDeep}3a 420px, ${C.wombDeep}14 480px, ${C.wombDeep}00 540px)`,
+        pointerEvents: "none",
+      }}
+    />
+  ) : null;
+
 export const RayGlow: React.FC<{ pose: Pose; o: number }> = ({ pose, o }) => {
   if (o <= 0.01) return null;
   const w = pose.hand.R * 0.2;
