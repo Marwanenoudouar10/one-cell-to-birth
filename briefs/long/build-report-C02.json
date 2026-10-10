@@ -1,0 +1,71 @@
+{
+ "summary": "I finished C02 (\"Week two already\"), built on the previous agent's work. The art and handoffs were already at the quality bar, so the main job was re-timing to the real voice and a little polish.\n\nBeats re-timed in beats.ts (voice words: two 2.03, they 2.24, last 3.52, period 3.80, line ends 4.45):\n- pronMeet lands at frame 60, on \"two\". The two pronuclei press together side by side and are never merged.\n- dotsDraw lands at frame 66, on \"they\".\n- periodDot lands at frame 104, on \"last\". Dot 1 turns rose for the last period.\n- runStart lands at frame 112, on \"period\". A light starts counting from dot 1 toward dot 14.\n- conception is now free at 4.5 s (frame 135), just after the line ends. Dot 14 flares gold and the zygote echoes it.\n- pushPeak, dotsFade and elongate were moved to fit around these. endHold stays at frame 165, so the END state C03 expects is unchanged.\n- I added a free beat, dotsDone (3.0 s). It sets how long the dot row takes to draw, so dots now pop one by one through \"they count\" instead of a hard-coded 15 frames.\n\nSync words were reassigned for meaning. Before, dot 1 lit on \"count\" and dot 14 flared on \"period\", which would tie the gold conception flash to the word \"period\". Now the rose dot is on \"last period\", the counting light leaves dot 1 on \"period\", and the gold flare fills the pause after the sentence (C03's \"One\" starts at C02's 6.0 s).\n\nPolish:\n- Dot 1 is now a plain day dot until \"last\", then turns rose. Before, it was already pinkish from the start.\n- The base dots are a little brighter, so the row reads at phone size.\n- The zygote now dims after the pronuclei meet (dotsDraw to dotsDone) instead of exactly on \"two\", so the meeting glint isn't dimmed.\n\nChecks:\n- Full-resolution handoffs: C01 frame 240 against C02 frame 0, and C02 frame 165 against C03 frame 0. Position, size, zona, pronuclei pose and elongation all line up.\n- I did 4 render, look and fix cycles, all at scale 0.4 and one render at a time.\n- Types for the C02 folder are clean, every file is 300 lines or fewer, the chapter is deterministic, and all SVG ids start with \"c02-\". The final preview rendered successfully (180 frames).",
+ "files": [
+  "/Users/tandeemwork/birth-teaser/src/long/chapters/C02/beats.ts",
+  "/Users/tandeemwork/birth-teaser/src/long/chapters/C02/DayDots.tsx",
+  "/Users/tandeemwork/birth-teaser/src/long/chapters/C02/motion.ts",
+  "/Users/tandeemwork/birth-teaser/src/long/chapters/C02/index.tsx",
+  "/Users/tandeemwork/birth-teaser/src/long/chapters/C02/Zygote.tsx",
+  "/Users/tandeemwork/birth-teaser/src/long/chapters/C02/Pronuclei.tsx",
+  "/Users/tandeemwork/birth-teaser/src/long/chapters/C02/Glow.tsx",
+  "/Users/tandeemwork/birth-teaser/src/long/chapters/C02/Zona.tsx",
+  "/Users/tandeemwork/birth-teaser/src/long/chapters/C02/Specks.tsx",
+  "/Users/tandeemwork/birth-teaser/src/long/chapters/C02/palette.ts",
+  "/Users/tandeemwork/birth-teaser/out/long-C02.mp4",
+  "/Users/tandeemwork/birth-teaser/out/long-C02-sheet.jpg"
+ ],
+ "sfxCues": [
+  {
+   "localSec": 0.3,
+   "sound": "soft warm low swell / gentle exhale",
+   "note": "C01's white-hot zygote melts into the calm, lit cell (handoff)"
+  },
+  {
+   "localSec": 0.4,
+   "sound": "very faint liquid glide, two soft bubbly tones drifting toward each other",
+   "note": "the gold and peach pronuclei form at opposite edges and drift inward (0.4 to 2.0 s), keep it under the VO"
+  },
+  {
+   "localSec": 2,
+   "sound": "soft glassy bubble kiss (tiny 'tink' with a short warm tail)",
+   "note": "pronuclei press together side by side on 'two' (2.03); contact glint"
+  },
+  {
+   "localSec": 2.2,
+   "sound": "row of 14 tiny soft plucks / ticks, quick rising stagger",
+   "note": "hairline draws and the 14 day dots pop in one by one (2.2 to 3.0 s)"
+  },
+  {
+   "localSec": 3.47,
+   "sound": "warm muted chime, low register",
+   "note": "dot 1 glows rose (the last period) on 'last' (3.52)"
+  },
+  {
+   "localSec": 3.73,
+   "sound": "soft ascending shimmer / light tick run",
+   "note": "a light leaves dot 1 on 'period' (3.80) and counts dot by dot toward dot 14 (until 4.5)"
+  },
+  {
+   "localSec": 4.5,
+   "sound": "bright gold chime with a sparkle tail plus a soft low bloom",
+   "note": "dot 14 flares gold (conception) and an echo ring rolls out around the zygote, just after the line ends"
+  },
+  {
+   "localSec": 4.95,
+   "sound": "airy soft dissolve (gentle reverse breath)",
+   "note": "the dots dissolve left to right, dot 14 last (to 5.5)"
+  },
+  {
+   "localSec": 4.85,
+   "sound": "subtle low tension swell / soft membrane stretch",
+   "note": "zygote starts to elongate (anticipation of C03's first split), carries into C03's crossfade at 5.5"
+  }
+ ],
+ "startState": "C01's END state, exactly: Scene1's settled white-hot gold zygote at (540, 860), core r150, zona about r175.5, breathing \u00b12% on a 56-frame cycle phase-locked to C01. No tracker yet. Checked at full resolution against C01 frame 240.",
+ "endState": "From frame 165 (5.5 s) on: the calm, sculpted Scene2-look zygote at (540, 860), core r150 stretched along x (rx = 150 \u00d7 1.06, ry = 150 / 1.06) inside the rigid round zona (r175.5). Camera is back at 1.0. The two pronuclei are pressed together, never merged: r31, on a -70\u00b0 axis around (0, 6), gold at the lower-left end. The wide soft gold glow and the cytoplasm granules match C03's expectations. The dot row is gone. Checked at full resolution against C03 frame 0.",
+ "knownIssues": [
+  "The tracker lands late. In the preview, WEEK 02 first shows at about frame 75 (2.5 s), but 'two' is spoken at 2.03 s. That comes from C02's weekKeys in src/long/chapters.ts ([[1.9, 1], [2.15, 2]]), which I'm not allowed to edit. To land on 'two', the orchestrator could move them to about [[1.45, 1], [1.6, 2]].",
+  "Sync words were reassigned to fit the real read: periodDot is now on 'last', runStart on 'period', and conception is free at 4.5 s, just after the line ends. Before, the beats were on 'count', 'from' and 'period', which would have put the gold conception flash on the word 'period'.",
+  "The START handoff has a very small difference: C01 frame 240 has a slightly larger white highlight in the core than C02 frame 0. Position, size and zona match, and the 15-frame crossfade hides the difference."
+ ]
+}
