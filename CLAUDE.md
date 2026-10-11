@@ -1,7 +1,7 @@
 # birth-teaser: guide for Claude
 
 Vertical motion-graphics explainer of human development, from fertilisation to birth.
-Remotion 4.0.534, React 19, TypeScript. 1080x1920 at 30 fps, flat 2D Kurzgesagt-like look. Git repo: github.com/Marwanenoudouar10/birth-teaser (public).
+Remotion 4.0.534, React 19, TypeScript. 1080x1920 at 30 fps, flat 2D Kurzgesagt-like look. Git repo: github.com/Marwanenoudouar10/one-cell-to-birth (public).
 - **Main**: the 30 s teaser in `src/scenes/Scene1..5`. Done: `out/final/teaser-30s.mp4` (music still missing).
 - **Long**: about 2:29, made of a C00 hook plus chapters C01-C16 in `src/long/`. Status and next steps are in `RESUME.md`.
 
