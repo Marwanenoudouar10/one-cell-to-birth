@@ -44,7 +44,7 @@
 - C07 started alongside C06.
 - C06 done (20:50). Note: agents found vo-words.md up to 0.3 s late inside phrases (char-weighted guess) and measured onsets from the wav instead. Final pass: improve word timing (better aligner) and re-check captions vs voice.
   C06 weekKeys re-timed to the voice. TODO after C07+C08 finish: embryo kit week-6 head/eye reads as a chick at phone size -> fix once in src/shared/embryo (Face/eye) so C06-C08 all change; then re-check C06-C08 previews.
-- GitHub (public): https://github.com/Marwanenoudouar10/birth-teaser — first commit ada54be (C00-C06). Commit + push after each finished chapter (no Co-Authored-By; git-config identity). Finished videos go in GitHub Releases, not the repo.
+- GitHub (public): https://github.com/Marwanenoudouar10/one-cell-to-birth — first commit ada54be (C00-C06). Commit + push after each finished chapter (no Co-Authored-By; git-config identity). Finished videos go in GitHub Releases, not the repo.
 - C07 polished 7 -> 7.6 (21:10). weekKeys re-timed. Kit TODO grows: embryo week 6/7 'duckling' read (head + dot eye + red heart as bill); womb backdrop fold rings read as a target in wide shots (C07 END, copied by C08, and C11 uses ripples).
 - VO bleed found (C07 tail has C08's "Week eight"; C09 lost "a face" to C10's head; C14 head has "grows"; C15 head has "probably ready") -> VO repair job running before C09 starts.
 - SPEED-UP (21:00, same quality bar): chapter packs (scripts/make_packs.py -> briefs/long/packs/), range renders (FRAMES=a-b), joins matched by numbers during build + ONE final pixel join pass by the orchestrator, 3 agents at a time. Workflow: scripts/workflows/birth-long-chapter-v2.js. Regenerate packs AFTER the VO repair (vo-words.md changes).
