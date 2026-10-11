@@ -13,7 +13,7 @@
 ## What the film covers
 A question hook ("Have you ever wondered how you began?"), then 16 chapters: the race and fertilisation, cell division, implantation and the pregnancy-test hormone, the three germ layers, the first heartbeat, the first movement, webbed fingers and the tail, embryo becoming a fetus, fingerprints, the first kick a mother feels, hearing and opening eyes, the brain growth spurt, practice breathing, knowing mum's voice, and birth with the first breath. A week counter with a size label ("size of a lime · 5.4 cm") runs through all 40 weeks.
 
-**Status:** chapters C00-C08 are finished (with voice); C09-C16 are in progress. See `RESUME.md`.
+**Status:** chapters C00-C08 are finished (with voice); C09-C16 are in progress.
 A shorter 30-second cut (composition `Main`, `src/scenes/`) came first and is finished; the long film reuses its look and code.
 
 ## Run it
@@ -23,7 +23,7 @@ npm run studio                                   # Remotion Studio: browse Long,
 scripts/long-preview.sh C05 0.4                  # one chapter, with its voice -> out/long/C05/preview.mp4 + sheet.jpg
 npx remotion render src/long/entry.ts Long out/final/long.mp4    # the full film
 ```
-Audio pipeline (voice split into chapter clips, word timing, sound-effect prep, -14 LUFS master): `scripts/audio/` and the commands in `CLAUDE.md`.
+Audio pipeline (voice split into chapter clips, word timing, sound-effect prep, -14 LUFS master): `scripts/audio/`.
 
 ## How it is organised
 ```
@@ -31,14 +31,11 @@ src/long/               the film: chapters.ts (timeline), chapters/C00..C16/, ca
 src/shared/             reusable kits: fetus (weeks 9-40), embryo (weeks 3-8), womb
 src/scenes/             the earlier 30 s cut
 src/theme, src/lib      palette, layout, easing, transitions (focusPull)
-scripts/                preview / render / audio / QA scripts, plus the AI-agent workflow scripts
+scripts/                preview / render / audio / QA scripts
 briefs/                 storyboard, narration, fact list with sources (briefs/long/facts.md)
-docs/                   LESSONS.md (mistakes and fixes), REUSE.md (how to reuse this for a new film)
+docs/                   README images
 public/                 voice and sound files used by the film
 ```
-
-## How it was made
-Built with Claude Code agents: research and an adversarial fact-check, competing scripts judged by other agents, one builder per chapter followed by an independent "polish" reviewer, and multi-lens QA. `CLAUDE.md` holds the rules those agents follow; `docs/LESSONS.md` records what went wrong and how it was fixed.
 
 ## Accuracy
 Weeks are gestational (counted from the last period), as doctors use. Every narrated fact is listed with its sources in `briefs/long/facts.md`. This is an educational animation, not medical advice.
