@@ -8,7 +8,7 @@ import { C } from "../../../theme/colors";
 import type { P2 } from "./timeline";
 import { Guides, cut, lengths, segment, toD } from "./guides";
 
-const TICK_GAP = 30;
+const TICK_GAP = 36;
 
 // small perpendicular ruler ticks along a sampled curve
 const tickMarks = (pts: P2[], half: number) => {
@@ -42,7 +42,7 @@ export const Measure: React.FC<Props> = ({ g, cr, heel, sweep, alpha }) => {
   const p1 = g.backPts[2];
   const l = Math.hypot(p1.x - p0.x, p1.y - p0.y) || 1;
   const n = { x: -(p1.y - p0.y) / l, y: (p1.x - p0.x) / l };
-  const bar = `M${p0.x - n.x * 11},${p0.y - n.y * 11}L${p0.x + n.x * 11},${p0.y + n.y * 11}`;
+  const bar = `M${p0.x - n.x * 22},${p0.y - n.y * 22}L${p0.x + n.x * 22},${p0.y + n.y * 22}`;
   // the knee joint lights once the caliper has passed it
   const legL = lengths(g.legPts);
   const kneeOn = H ? Math.max(0, Math.min(1, (heel * legL[2] - legL[1]) / 10)) : 0;
@@ -55,31 +55,31 @@ export const Measure: React.FC<Props> = ({ g, cr, heel, sweep, alpha }) => {
   return (
     <g opacity={alpha} fill="none" strokeLinecap="round" strokeLinejoin="round">
       <defs>
-        <filter id="c11-mglow" x="-20%" y="-20%" width="140%" height="140%">
-          <feGaussianBlur stdDeviation="5" />
+        <filter id="c11-measure-glow" filterUnits="userSpaceOnUse" x="-700" y="-700" width="1400" height="1400">
+          <feGaussianBlur stdDeviation="6" />
         </filter>
       </defs>
-      {/* soft dark under-line so the thread reads over the bright skin */}
-      <path d={dA} stroke={C.wombDeep} strokeOpacity={0.3} strokeWidth={7} />
-      {H && <path d={dH} stroke={C.wombDeep} strokeOpacity={0.5} strokeWidth={9} />}
-      <g filter="url(#c11-mglow)">
-        <path d={dA} stroke={C.peach} strokeOpacity={0.55} strokeWidth={7} />
-        {H && <path d={dH} stroke={C.gold} strokeOpacity={1} strokeWidth={14} />}
-        <circle cx={tip.x} cy={tip.y} r={16 + 10 * lock} fill={H ? C.gold : C.peach} opacity={0.75 + 0.25 * lock} />
-        {sw.length > 1 && <path d={toD(sw)} stroke={C.gold} strokeWidth={14} strokeOpacity={0.9} />}
+      {/* soft dark under-line so the thread reads over the fluid and the bright skin */}
+      <path d={dA} stroke={C.wombDeep} strokeOpacity={0.45} strokeWidth={14} />
+      {H && <path d={dH} stroke={C.wombDeep} strokeOpacity={0.5} strokeWidth={16} />}
+      <g filter="url(#c11-measure-glow)">
+        <path d={dA} stroke={C.peach} strokeOpacity={0.6} strokeWidth={20} />
+        {H && <path d={dH} stroke={C.gold} strokeOpacity={0.95} strokeWidth={26} />}
+        <circle cx={tip.x} cy={tip.y} r={22 + 12 * lock} fill={H ? C.gold : C.peach} opacity={0.8 + 0.2 * lock} />
+        {sw.length > 1 && <path d={toD(sw)} stroke={C.gold} strokeWidth={24} strokeOpacity={0.9} />}
       </g>
-      <path d={dA} stroke={C.text} strokeOpacity={0.92} strokeWidth={2.6} />
-      <path d={tickMarks(A.pts, 4)} stroke={C.text} strokeOpacity={0.55} strokeWidth={1.6} />
-      <path d={bar} stroke={C.text} strokeOpacity={0.95} strokeWidth={2.6} />
+      <path d={dA} stroke={C.text} strokeOpacity={0.95} strokeWidth={5.5} />
+      <path d={tickMarks(A.pts, 9)} stroke={C.text} strokeOpacity={0.75} strokeWidth={3} />
+      <path d={bar} stroke={C.text} strokeOpacity={0.95} strokeWidth={6} />
       {H && (
         <>
-          <path d={dH} stroke={C.gold} strokeWidth={4.2} />
-          <path d={tickMarks(H.pts, 4.5)} stroke={C.gold} strokeOpacity={0.85} strokeWidth={1.8} />
+          <path d={dH} stroke={C.gold} strokeWidth={7} />
+          <path d={tickMarks(H.pts, 9.5)} stroke={C.gold} strokeOpacity={0.9} strokeWidth={3} />
         </>
       )}
-      {sw.length > 1 && <path d={toD(sw)} stroke={C.text} strokeWidth={3} strokeOpacity={0.9} />}
-      {kneeOn > 0 && <circle cx={g.knee.x} cy={g.knee.y} r={4.5 * kneeOn} fill={C.gold} stroke={C.text} strokeWidth={1.4} />}
-      <circle cx={tip.x} cy={tip.y} r={5.5 + 1.5 * lock} fill={C.text} stroke="none" />
+      {sw.length > 1 && <path d={toD(sw)} stroke={C.text} strokeWidth={6} strokeOpacity={0.95} />}
+      {kneeOn > 0 && <circle cx={g.knee.x} cy={g.knee.y} r={7.5 * kneeOn} fill={C.gold} stroke={C.text} strokeWidth={2.4} />}
+      <circle cx={tip.x} cy={tip.y} r={9 + 2 * lock} fill={C.text} stroke="none" />
     </g>
   );
 };

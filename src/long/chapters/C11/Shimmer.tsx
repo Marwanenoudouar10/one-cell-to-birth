@@ -1,20 +1,25 @@
 // Week-18/19 skin details, in fetus-local px:
-// - Lanugo: a glint runs crown -> bottom along the backlit outline and lights
-//   the fine hair fuzz as it passes (the kit draws the fuzz; this reveals it).
-// - Vernix: a thin waxy sheen band slides across the body (clipped to it).
-// - Ear: a soft glow + one ring when the low sound ring reaches the ear.
+// - Lanugo: a bright glint runs crown -> bottom along the backlit outline and
+//   lights the fine hair fuzz as it passes; the fuzz it reveals stays faintly
+//   lit behind it for a moment (the kit draws the fuzz; this reveals it).
+// - Vernix: a thin waxy sheen band slides across the body (clipped to it); no
+//   all-over tint (screening peach onto peach skin washes it out pale).
+// - Ear: the low sound wraps into the ear (two short arcs converge on it from
+//   the mother's side) and the ear blooms warm. No full rings or dots: a ring
+//   round a dot on the head would read as a second eye.
+// - TipGlow: C10's glowing fingertips linger while the focus pulls back.
 import React from "react";
 import { C } from "../../../theme/colors";
-import { Guides, cut, lengths, toD } from "./guides";
+import { Guides, lengths, segment, toD } from "./guides";
 
-const HAIR_GAP = 6.5;
+const HAIR_GAP = 7;
 
-export const Lanugo: React.FC<{ g: Guides; p: number; a: number }> = ({ g, p, a }) => {
+export const Lanugo: React.FC<{ g: Guides; p: number; a: number; rest: number }> = ({ g, p, a, rest }) => {
   if (a < 0.01) return null;
   const pts = g.skinPts;
   const L = lengths(pts);
   const total = L[L.length - 1];
-  const glint = (-0.12 + 1.24 * p) * total;
+  const glint = (-0.1 + 1.2 * p) * total;
   const hairs: { d: string; o: number }[] = [];
   let i = 1;
   for (let s = 4; s < total - 4; s += HAIR_GAP) {
@@ -27,31 +32,40 @@ export const Lanugo: React.FC<{ g: Guides; p: number; a: number }> = ({ g, p, a 
     const t = { x: (B.x - A.x) / l, y: (B.y - A.y) / l };
     let n = { x: -t.y, y: t.x };
     if (n.x * q.x + n.y * q.y < 0) n = { x: -n.x, y: -n.y }; // point away from the body
-    const h = 8 + 5 * Math.abs(Math.sin(s * 1.7)); // uneven fine hairs
-    const d = { x: n.x + 0.5 * t.x, y: n.y + 0.5 * t.y }; // lying back along the flow
-    const o = Math.exp(-(((s - glint) / 80) ** 2));
-    if (o < 0.04) continue;
+    const h = 11 + 7 * Math.abs(Math.sin(s * 1.7)); // uneven fine hairs
+    const d = { x: n.x + 0.55 * t.x, y: n.y + 0.55 * t.y }; // lying back along the flow
+    const lit = Math.exp(-(((s - glint) / 70) ** 2));
+    // behind the glint the revealed fuzz keeps a soft glow for a moment
+    const behind = rest * Math.max(0, Math.min(1, (glint - s) / 60));
+    const o = Math.max(lit, 0.38 * behind);
+    if (o < 0.03) continue;
     hairs.push({ d: `M${(q.x - n.x * 2).toFixed(1)},${(q.y - n.y * 2).toFixed(1)}l${(d.x * h).toFixed(1)},${(d.y * h).toFixed(1)}`, o });
   }
-  const g0 = Math.max(0, glint - 90) / total;
-  const g1 = Math.min(total, glint + 90) / total;
-  const seg = g1 > g0 ? cut(pts, g1).pts.filter((_, j) => L[Math.min(j, L.length - 1)] >= g0 * total) : [];
+  // the glint: three tapered passes of light along the outline
+  const pass = (half: number) => toD(segment(pts, glint - half, glint + half));
+  const on = glint > -120 && glint < total + 120;
   return (
-    <g opacity={a} fill="none" strokeLinecap="round">
+    <g opacity={a} fill="none" strokeLinecap="round" style={{ mixBlendMode: "screen" }}>
       <defs>
-        <filter id="c11-lglow" x="-20%" y="-20%" width="140%" height="140%">
-          <feGaussianBlur stdDeviation="7" />
+        <filter id="c11-lanugo-glow" filterUnits="userSpaceOnUse" x="-700" y="-700" width="1400" height="1400">
+          <feGaussianBlur stdDeviation="9" />
+        </filter>
+        <filter id="c11-lanugo-soft" filterUnits="userSpaceOnUse" x="-700" y="-700" width="1400" height="1400">
+          <feGaussianBlur stdDeviation="2.5" />
         </filter>
       </defs>
-      {seg.length > 1 && (
-        <g filter="url(#c11-lglow)">
-          <path d={toD(seg)} stroke={C.peach} strokeWidth={24} strokeOpacity={0.55} />
-          <path d={toD(seg)} stroke={C.text} strokeWidth={7} strokeOpacity={0.7} />
-        </g>
+      {on && (
+        <>
+          <g filter="url(#c11-lanugo-glow)">
+            <path d={pass(170)} stroke={C.peach} strokeWidth={48} strokeOpacity={0.42} />
+            <path d={pass(100)} stroke={C.gold} strokeWidth={22} strokeOpacity={0.5} />
+          </g>
+          <path d={pass(55)} stroke={C.text} strokeWidth={9} strokeOpacity={0.85} filter="url(#c11-lanugo-soft)" />
+        </>
       )}
-      <g stroke={C.text} strokeWidth={1.6}>
+      <g stroke={C.text} strokeWidth={2.4}>
         {hairs.map((h, j) => (
-          <path key={j} d={h.d} strokeOpacity={0.75 * h.o} />
+          <path key={j} d={h.d} strokeOpacity={0.9 * h.o} />
         ))}
       </g>
     </g>
@@ -63,50 +77,69 @@ export const Vernix: React.FC<{ g: Guides; p: number; a: number }> = ({ g, p, a 
   const b = g.a.bounds;
   const w = b.x1 - b.x0;
   const h = b.y1 - b.y0;
-  const x = b.x0 - 0.5 * w + 2 * w * p;
+  const x = b.x0 - 0.45 * w + 1.9 * w * p;
   const cy = (b.y0 + b.y1) / 2;
   return (
-    <g opacity={a}>
+    <g opacity={a} style={{ mixBlendMode: "screen" }}>
       <defs>
-        <clipPath id="c11-body">
+        <clipPath id="c11-vernix-body">
           {g.silhouette.map((d, i) => (
             <path key={i} d={d} transform={g.css} />
           ))}
         </clipPath>
-        <linearGradient id="c11-sheenG" x1="0" y1="0" x2="1" y2="0">
+        <linearGradient id="c11-vernix-band" x1="0" y1="0" x2="1" y2="0">
           <stop offset="0" stopColor={C.text} stopOpacity={0} />
-          <stop offset="0.5" stopColor={C.text} stopOpacity={0.4} />
+          <stop offset="0.4" stopColor={C.text} stopOpacity={0.16} />
+          <stop offset="0.5" stopColor={C.text} stopOpacity={0.36} />
+          <stop offset="0.6" stopColor={C.text} stopOpacity={0.16} />
           <stop offset="1" stopColor={C.text} stopOpacity={0} />
         </linearGradient>
       </defs>
-      <g clipPath="url(#c11-body)">
-        <rect x={b.x0 - 50} y={b.y0 - 50} width={w + 100} height={h + 100} fill={C.text} opacity={0.07} />
-        <rect x={x - 90} y={cy - h} width={180} height={2 * h} fill="url(#c11-sheenG)" transform={`rotate(24 ${x} ${cy})`} />
+      <g clipPath="url(#c11-vernix-body)">
+        <rect x={x - 130} y={cy - h} width={260} height={2 * h} fill="url(#c11-vernix-band)" transform={`rotate(24 ${x} ${cy})`} />
       </g>
     </g>
   );
 };
 
-// The ear catches the low sound: a warm glow and two soft rings.
-export const EarGlow: React.FC<{ g: Guides; a: number; age: number }> = ({ g, a, age }) => {
-  if (a < 0.01) return null;
+// The ear catches the low sound: two short arcs (open toward the ear, on the
+// mother's side) close in on it, then a small warm, slightly tall bloom (kept
+// tight: a big screen glow over the skin washes the whole head out pale).
+export const EarGlow: React.FC<{ g: Guides; a: number; age: number; from: number }> = ({ g, a, age, from }) => {
+  const arcs = [-12, -6]
+    .map((d) => ({ u: (age - d) / 12 }))
+    .filter((r) => r.u > 0 && r.u < 1);
+  if (a < 0.01 && arcs.length === 0) return null;
   const e = g.a.ear;
-  const rings = [0, 7].map((d) => ({ age: age - d })).filter((r) => r.age > 0 && r.age < 40);
+  const arc = (r: number) => {
+    const a0 = ((from - 48) * Math.PI) / 180;
+    const a1 = ((from + 48) * Math.PI) / 180;
+    return `M${(e.x + Math.cos(a0) * r).toFixed(1)},${(e.y + Math.sin(a0) * r).toFixed(1)}A${r.toFixed(1)},${r.toFixed(1)} 0 0 1 ${(e.x + Math.cos(a1) * r).toFixed(1)},${(e.y + Math.sin(a1) * r).toFixed(1)}`;
+  };
   return (
     <g style={{ mixBlendMode: "screen" }}>
       <defs>
-        <radialGradient id="c11-earG">
-          <stop offset="0" stopColor={C.text} stopOpacity={0.75} />
-          <stop offset="0.22" stopColor={C.gold} stopOpacity={0.5} />
-          <stop offset="0.6" stopColor={C.peach} stopOpacity={0.22} />
+        <radialGradient id="c11-ear-bloom">
+          <stop offset="0" stopColor={C.text} stopOpacity={0.85} />
+          <stop offset="0.2" stopColor={C.gold} stopOpacity={0.6} />
+          <stop offset="0.55" stopColor={C.gold} stopOpacity={0.16} />
           <stop offset="1" stopColor={C.rose} stopOpacity={0} />
         </radialGradient>
+        <filter id="c11-ear-glow" filterUnits="userSpaceOnUse" x="-700" y="-700" width="1400" height="1400">
+          <feGaussianBlur stdDeviation="6" />
+        </filter>
       </defs>
-      <circle cx={e.x} cy={e.y} r={78} fill="url(#c11-earG)" opacity={a} />
-      {rings.map((r, i) => (
-        <circle key={i} cx={e.x} cy={e.y} r={18 + r.age * 2.6} fill="none" stroke={C.peach} strokeWidth={3 - 1.4 * (r.age / 40)}
-          opacity={0.9 * Math.exp(-r.age / 13) * Math.min(1, r.age / 2) * a} />
-      ))}
+      {a > 0.01 && <ellipse cx={e.x - 3} cy={e.y} rx={50} ry={64} fill="url(#c11-ear-bloom)" opacity={a} />}
+      {arcs.map((r, i) => {
+        const rad = 120 - 92 * r.u;
+        const o = Math.sin(Math.PI * Math.min(1, r.u * 1.15));
+        return (
+          <g key={i} fill="none" strokeLinecap="round" opacity={0.9 * o}>
+            <path d={arc(rad)} stroke={C.peach} strokeWidth={20} strokeOpacity={0.5} filter="url(#c11-ear-glow)" />
+            <path d={arc(rad)} stroke={C.text} strokeWidth={6} strokeOpacity={0.85} />
+          </g>
+        );
+      })}
     </g>
   );
 };
@@ -118,13 +151,13 @@ export const TipGlow: React.FC<{ g: Guides; a: number }> = ({ g, a }) => {
   return (
     <g style={{ mixBlendMode: "screen" }} opacity={a}>
       <defs>
-        <radialGradient id="c11-tipG">
+        <radialGradient id="c11-tip-glow">
           <stop offset="0" stopColor={C.gold} stopOpacity={0.7} />
           <stop offset="1" stopColor={C.gold} stopOpacity={0} />
         </radialGradient>
       </defs>
       {g.a.fingertips.slice(0, 4).map((p, i) => (
-        <circle key={i} cx={p.x} cy={p.y} r={9} fill="url(#c11-tipG)" />
+        <circle key={i} cx={p.x} cy={p.y} r={9} fill="url(#c11-tip-glow)" />
       ))}
     </g>
   );

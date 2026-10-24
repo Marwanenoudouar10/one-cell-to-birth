@@ -7,7 +7,7 @@ import { EASE, tween } from "../../../lib/ease";
 import { fetusAnchors } from "../../../shared/fetus";
 import { Ripple, kickShake, sacEntry } from "../../../shared/womb";
 import { BEATS as B } from "./beats";
-import { Core, EAR_HIT, IMPACT, P2, SAC_C, core, lerp } from "./timeline";
+import { Core, EAR_HIT, IMPACT, P2, SAC_C, TAPS, core, lerp } from "./timeline";
 
 const add = (a: P2, b: P2): P2 => ({ x: a.x + b.x, y: a.y + b.y });
 const mean = (ps: P2[]): P2 => ({ x: ps.reduce((s, p) => s + p.x, 0) / ps.length, y: ps.reduce((s, p) => s + p.y, 0) / ps.length });
@@ -63,76 +63,115 @@ export const WAVE_START = B.sound - entry / speed;
 export const WAVE_END = WAVE_START + WAVE_LEN / speed;
 const WAVE_ENTRY = { x: from.x + Math.cos((WAVE_DIR * Math.PI) / 180) * entry, y: from.y + Math.sin((WAVE_DIR * Math.PI) / 180) * entry };
 
-// --- the flutter: bubble-like ripples spreading across the lower-right wall,
-// around the spot the kick will strike (kept clear of the placenta) ---
-const FL_ANG = KICK_ANG - 8;
-const FL_N = 17;
-export const FLUTTER = Array.from({ length: FL_N }, (_, i) => {
-  // spread outward from the centre, alternating sides
-  const side = i % 2 === 0 ? 1 : -1;
-  const reach = Math.ceil(i / 2) / Math.ceil((FL_N - 1) / 2);
-  const r = (k: string) => random(`c11-fl-${k}-${i}`);
-  return {
-    ang: FL_ANG + side * reach * (side > 0 ? 34 : 30) + (r("a") - 0.5) * 6,
-    t: B.flutter + Math.round(i * 1.1 + r("t") * 2),
-    out: -16 + 46 * r("o"), // px from the membrane: just inside the fluid .. into the wall
-    size: (1.35 - 0.5 * reach) * (0.8 + 0.4 * r("s")),
-  };
-});
-export const FLUTTER_LIFE = 26;
-export const FLUTTER_SPAN = [FL_ANG - 30, FL_ANG + 40];
+// --- the flutter: each light flick of the foot is felt by the wall right by
+// the toes (the direction the foot points at that frame); the wall answers
+// with a quiver and a few small bubble-like ripples that spread along it,
+// working up the wall toward the spot the kick will strike ---
+const footAngle = (f: number) => {
+  const c = state(f);
+  const a = fetusAnchors(c.week, c.pose, c.size);
+  const far = a.footReach.map((q) => add(c.pos, q)).sort((p, q) => Math.hypot(q.x - SAC_C.x, q.y - SAC_C.y) - Math.hypot(p.x - SAC_C.x, p.y - SAC_C.y))[0];
+  return (Math.atan2(far.y - SAC_C.y, far.x - SAC_C.x) * 180) / Math.PI;
+};
+const SPREAD = [0, -8, 5, -14]; // where each tap's ripples centre, relative to the toes (deg)
+export const TAP_AT = TAPS.map((t, k) => ({ t, ang: footAngle(t) + SPREAD[k] }));
+export const BUBBLES = TAP_AT.flatMap((tap, k) =>
+  [0, 1, 2, 3].map((j) => {
+    const r = (s: string) => random(`c11-bub-${s}-${k}-${j}`);
+    return {
+      ang: tap.ang + (j - 1.4) * 6.2 + (r("a") - 0.5) * 4,
+      t: tap.t + (j === 0 ? 0 : 1 + Math.round(r("t") * 3)),
+      out: -10 + 46 * r("o"), // px from the membrane: just inside the fluid .. into the wall
+      R: (j === 0 ? 31 : 15 + 17 * r("s")) * (1 - 0.06 * k), // final radius (px), uneven: >= 8 px at phone size
+      life: 13 + Math.round(5 * r("l")),
+      rise: 0.5 + 0.6 * r("d"), // px per frame, drifting up
+    };
+  }),
+);
 
 // --- every sac ripple of the chapter (the kit keeps only the live ones) ---
-export const RIPPLES: Ripple[] = [
+const RIPPLES: Ripple[] = [
   { ...WAVE_ENTRY, t: B.sound, kind: "sound", strength: 0.9, life: 70 },
-  ...FLUTTER.filter((_, i) => i % 2 === 0).map((b): Ripple => ({ ...polar(b.ang, 400), t: b.t, kind: "sound", strength: 2.1, life: 40 })),
+  // each flick makes the membrane quiver by the toes (the wall moves)
+  ...TAP_AT.map((p, i): Ripple => ({ ...polar(p.ang, 404), t: p.t, kind: "sound", strength: 2.6 - 0.3 * i, life: 40 })),
   { ...KICK_AT, t: IMPACT, kind: "kick", strength: 0.85 },
   { ...KICK_AT, t: IMPACT + 1, kind: "beat", strength: 0.75 },
   { ...KICK_AT, t: IMPACT + 9, kind: "beat", strength: 0.35 },
 ];
+// Under C12's focus pull the fluid rings fade (their strength is an alpha).
+// A kick's strength also sets its ring RADIUS, so scaling it would shrink the
+// rings back into a small target: instead its clock runs ahead, and the rings
+// keep spreading (faster) and fade out by the last frame.
+const KICK_WARP = 22; // extra frames of kick age by B.end
+export const ripplesAt = (f: number): Ripple[] => {
+  const k = exitFade(f);
+  if (k > 0.999) return RIPPLES;
+  const warp = KICK_WARP * tween(f, B.exit, B.end, [0, 1], EASE.in);
+  return RIPPLES.map((r) => (r.kind === "kick" ? { ...r, t: r.t - warp } : { ...r, strength: (r.strength ?? 1) * k }));
+};
 
 // --- camera: pull back from the fingertips, breathe, hold while the week-20
-// spurt pops (so the growth reads), make room, then lean in to the wall ---
+// spurt pops (so the growth reads), ease out a little for the stretch, lean
+// down to the wall the foot flutters against, then push in on the kick and
+// stay on it to the end (its rings are still spreading under C12's pull) ---
 export const camera = (f: number) => {
   const T = B.weekTwenty;
   const pull = tween(f, 0, B.pullEnd, [0, 1], EASE.inOut);
   const punch = tween(f, IMPACT - 1, IMPACT + 1) * Math.exp(-Math.max(0, f - IMPACT) / 6);
+  const lean = tween(f, B.stretchEnd, B.flutter, [0, 1], EASE.inOut);
+  const push = tween(f, B.tuck, IMPACT, [0, 1], EASE.inOut);
   const wide =
-    lerp(1.1, 1.14, tween(f, B.pullEnd, T, [0, 1], EASE.inOut)) *
-    lerp(1, 0.9, tween(f, T + 12, T + 50, [0, 1], EASE.inOut)) *
-    lerp(1, 1.025, tween(f, T + 50, B.flutter - 24, [0, 1], EASE.inOut)) *
-    lerp(1, 1.06, tween(f, B.flutter - 24, B.flutter + 12, [0, 1], EASE.inOut)) *
-    lerp(1, 1.02, tween(f, IMPACT + 8, B.end, [0, 1], EASE.inOut)) *
+    lerp(1.2, 1.24, tween(f, B.pullEnd, T, [0, 1], EASE.inOut)) *
+    lerp(1, 0.88, tween(f, T + 12, T + 50, [0, 1], EASE.inOut)) *
+    lerp(1, 1.025, tween(f, T + 50, B.stretchEnd, [0, 1], EASE.inOut)) *
+    lerp(1, 1.08, lean) *
+    lerp(1, 1.05, push) *
+    lerp(1, 1.02, tween(f, IMPACT + 6, B.end, [0, 1], EASE.inOut)) *
     (1 + 0.02 * punch);
   const earLook = tween(f, B.sound - 20, B.sound + 6, [0, 1], EASE.inOut) * (1 - tween(f, B.startle + 10, T, [0, 1], EASE.inOut));
-  const wallLook = tween(f, B.flutter - 24, B.flutter + 12, [0, 1], EASE.inOut) * (1 - tween(f, IMPACT + 14, B.end, [0, 1], EASE.inOut));
-  const look = { x: SAC_C.x - 10 * earLook + 44 * wallLook, y: SAC_C.y + 14 - 22 * earLook + 30 * wallLook };
+  const look = {
+    x: SAC_C.x - 10 * earLook + 100 * lean + 25 * push,
+    y: SAC_C.y + 30 - 22 * earLook + 95 * lean - 25 * push,
+  };
   const zoom = Math.exp(lerp(Math.log(6.2), Math.log(wide), pull));
   return { zoom, x: lerp(HAND0.x, look.x, pull), y: lerp(HAND0.y, look.y, pull), shake: kickShake(f, IMPACT, 3) };
 };
 
+// --- the womb wall: dead still since C07 (frozen clock, no breathing) until
+// the flutter, when it stirs for the first time and starts to breathe ---
+export const WALL_CLOCK0 = 285;
+export const wall = (f: number) => ({
+  clock: WALL_CLOCK0 + Math.max(0, f - B.flutter) + 26 * tween(f, B.flutter - 1, B.flutter + 22, [0, 1], EASE.out),
+  breathe: tween(f, B.flutter - 1, B.flutter + 30, [0, 1], EASE.inOut),
+});
+
+// C12's focus pull starts at B.exit: glows, rings and flashes fade out under it
+export const exitFade = (f: number) => 1 - tween(f, B.exit, B.end, [0, 1], EASE.inOut);
+
 // --- effect envelopes ---
 export const effects = (f: number, c: Core) => ({
-  // lanugo glint running crown -> rump, then a vernix sheen across the body
-  shimmerP: tween(f, B.w18, B.w18 + 40, [0, 1], EASE.inOut),
-  shimmerA: tween(f, B.w18 - 2, B.w18 + 6) * (1 - tween(f, B.w18 + 36, B.w18 + 48, [0, 1], EASE.inOut)),
-  sheenP: tween(f, B.w18 + 14, B.w18 + 46, [0, 1], EASE.inOut),
-  sheenA: tween(f, B.w18 + 12, B.w18 + 20) * (1 - tween(f, B.w18 + 38, B.w18 + 50, [0, 1], EASE.inOut)),
-  ear: tween(f, EAR_HIT - 5, EAR_HIT + 1) * (1 - tween(f, EAR_HIT + 6, EAR_HIT + 42, [0, 1], EASE.inOut)),
+  // lanugo glint running crown -> bottom (the fuzz it reveals glows on behind it)
+  shimmerP: tween(f, B.w18, B.w18 + 34, [0, 1], EASE.inOut),
+  shimmerA: tween(f, B.w18 - 2, B.w18 + 5) * (1 - tween(f, B.w18 + 32, B.w18 + 46, [0, 1], EASE.inOut)),
+  // then a thin waxy vernix sheen slides across the body
+  sheenP: tween(f, B.w18 + 6, B.w18 + 34, [0, 1], EASE.inOut),
+  sheenA: tween(f, B.w18 + 4, B.w18 + 10) * (1 - tween(f, B.w18 + 28, B.w18 + 40, [0, 1], EASE.inOut)),
+  // the ear catches the low sound ring
+  ear: tween(f, EAR_HIT - 4, EAR_HIT + 1) * (1 - tween(f, EAR_HIT + 5, EAR_HIT + 30, [0, 1], EASE.inOut)),
   earAge: f - EAR_HIT,
+  earFrom: WAVE_DIR + 180, // direction from the ear back toward the sound (deg)
   // measuring line: crown -> rump, then on to the heel
   cr: tween(f, B.measureCR, B.measureCR + 12, [0, 1], EASE.inOut),
   heel: tween(f, B.measureHeel, B.measureHeel + 15, [0, 1], EASE.inOut),
   measureA: tween(f, B.measureCR - 3, B.measureCR + 3) * (1 - tween(f, B.measureOff, B.measureOff + 12, [0, 1], EASE.inOut)),
   // one glint along the whole line, crown -> heel, once it is complete
-  sweepP: tween(f, B.measureHeel + 15, B.measureHeel + 33, [0, 1], EASE.inOut),
+  sweepP: tween(f, B.measureHeel + 14, B.measureHeel + 28, [0, 1], EASE.inOut),
   // C10's glowing fingertips fade as the focus pulls back
   tips: tween(f, 0, 26, [1, 0], EASE.inOut),
-  // extra calm behind the captions while the close-up start fills the frame
-  capShade: tween(f, 0, B.pullEnd - 8, [1, 0], EASE.inOut),
-  // the flutter: light catches the moving wall
-  wall: tween(f, B.flutter - 2, B.flutter + 4) * (1 - tween(f, B.flutter + 14, B.flutter + 40, [0, 1], EASE.inOut)),
-  flash: f >= IMPACT ? Math.exp(-(f - IMPACT) / 6) : 0,
+  // extra calm behind the captions and the tracker while the close-up start
+  // fills the frame: tied to the camera zoom (full at 2.5x, gone by 1.35x)
+  capShade: EASE.inOut(Math.max(0, Math.min(1, (camera(f).zoom - 1.35) / 1.15))),
+  flash: (f >= IMPACT ? Math.exp(-(f - IMPACT) / 6) : 0) * exitFade(f),
   bloom: c.bloom,
 });
 export type Fx = ReturnType<typeof effects>;

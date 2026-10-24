@@ -25,8 +25,8 @@ export const Baby: React.FC<{ c: Core; fx: Fx; f: number }> = ({ c, fx, f }) => 
     <g transform={`translate(${c.pos.x.toFixed(2)} ${c.pos.y.toFixed(2)})`}>
       <Fetus week={c.week} size={c.size} pose={c.pose} rim={0.75 + 0.2 * fx.bloom} bloom={fx.bloom} cord={cord} uid="c11-baby" />
       <Vernix g={g} p={fx.sheenP} a={fx.sheenA} />
-      <Lanugo g={g} p={fx.shimmerP} a={fx.shimmerA} />
-      <EarGlow g={g} a={fx.ear} age={fx.earAge} />
+      <Lanugo g={g} p={fx.shimmerP} a={fx.shimmerA} rest={1} />
+      <EarGlow g={g} a={fx.ear} age={fx.earAge} from={fx.earFrom} />
       <Measure g={g} cr={fx.cr} heel={fx.heel} sweep={fx.sweepP} alpha={fx.measureA} />
       <TipGlow g={g} a={fx.tips} />
     </g>

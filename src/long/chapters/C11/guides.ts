@@ -91,7 +91,7 @@ export const guides = (week: number, pose: FetusPose, size: number) => {
     );
     return { pts: [...head, ...back, ...cap], bottom: cap[cap.length - 1] };
   };
-  const outer = backCurve(13);
+  const outer = backCurve(30); // clear of the skin, so it reads as a ruler, not a rim light
   const backPts = spline(outer.pts.map(o), 8);
   const skinPts = spline(backCurve(0).pts.map(o), 14);
   // leg: two straight caliper legs, bottom -> knee -> heel (thigh + shin)
