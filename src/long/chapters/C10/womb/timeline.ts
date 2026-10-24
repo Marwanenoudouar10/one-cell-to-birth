@@ -1,84 +1,68 @@
-// Every animated number of the womb shot (0 .. ~7 s), as a pure function of
-// the chapter-local frame. All story moments come from BEATS.
-import { noise2D } from "@remotion/noise";
-import { HERO } from "../../../../theme/layout";
-import { EASE, tween } from "../../../../lib/ease";
-import { FetusPose, fetusAnchors } from "../../../../shared/fetus";
-import { BEATS, after, s } from "../beats";
-import { Pt, add, clamp, lerp, lerpPt, mul, sub } from "../geom";
+// Every animated number of the womb shot (0 .. ~6.1 s), as a pure function of the
+// chapter-local frame. The fetus lives in rig.ts, the camera keys in camera.ts, the story
+// moments in beats.ts.
+import { EASE, heartbeat, tween } from "../../../../lib/ease";
+import { BEATS as B, C09_CLOCK } from "../beats";
+import { Pt, lerp, lerpPt, sub } from "../geom";
+import { cameraAt, worldToScreenCam } from "./camera";
+import { anchorsAt } from "./rig";
 
-const B = BEATS;
 const io = EASE.inOut;
-const nz = (k: string, f: number, speed = 0.012) => noise2D(`c10-${k}`, f * speed, 0);
 
-// world placement of the fetus origin (body centre) and the sac
-export const FETUS_AT: Pt = { x: 522, y: 858 };
-export const SAC_AT: Pt = { x: 540, y: 860 };
-export const TIP = 2; // the fingertip the camera pushes into (the most exposed one once the hand opens)
-
-// the camera frames the thumb-suck on this (stable) reference, not live anchors
-const SUCK_REF = (() => {
-  const a = fetusAnchors(15.5, { armPose: "thumbSuck" }, 530);
-  return add(FETUS_AT, add(mul(lerpPt(a.mouth, a.wrist, 0.45), 1), { x: -10, y: 40 }));
-})();
+// the fingertip the camera dives into: the middle finger of the opened hand (it fans
+// highest and furthest forward, clear of the face)
+export const TIP = 1;
 
 export const wombTimeline = (f: number) => {
-  // --- growth 12.5 -> ~17 wk (smooth; the counter carries the exact weeks)
-  const g = tween(f, 0, s(6.6), [0, 1], io);
-  const week = lerp(12.5, 16.9, g);
-  const size = lerp(505, 548, g);
-  const sacR = lerp(360, 384, g) * (1 + 0.004 * Math.sin(f * 0.09));
+  const g = f + C09_CLOCK;
+  const { r, a, W } = anchorsAt(f);
 
-  // --- X-ray (silent): bones warm from cartilage-blue to bone-white
-  const xray = tween(f, B.xrayOn, after(B.xrayOn, 0.55), [0, 1], io) * (1 - tween(f, after(B.xrayOff, -0.25), after(B.xrayOff, 0.45), [0, 1], io));
+  // ---- X-ray (silent): eases in after the fade, gone as the camera reaches the face
+  const xray = tween(f, B.xrayOn, B.xrayOn + 14, [0, 1], io) * (1 - tween(f, B.toFace - 4, B.toFace + 16, [0, 1], io));
   const oss = tween(f, B.ossify, B.ossifyDone, [0, 1], io);
-  const scan = tween(f, B.xrayOn, after(B.xrayOn, 0.9), [0, 1], EASE.inOut); // light band sweeping head -> toe
+  const scan = tween(f, B.xrayOn, B.xrayOn + 26, [0, 1], io); // a light band sweeps crown -> toes
 
-  // --- thumb: drift up, meet the lips, rhythmic sucking, release + open
-  const up = tween(f, B.handUp, B.thumbIn, [0, 1], io);
-  const rel = tween(f, B.release, after(B.release, 0.6), [0, 1], io);
-  const suckW = up * (1 - rel);
-  const env = tween(f, B.thumbIn, after(B.thumbIn, 0.2)) * (1 - tween(f, after(B.release, -0.15), after(B.release, 0.15)));
-  const suck = env * (0.5 - 0.5 * Math.cos(((f - B.thumbIn) / 14) * Math.PI * 2));
-  const handOpen = lerp(lerp(0.55, 0.2, up), 0.95, rel);
+  // ---- camera: keys, then the dive toward one fingertip (EASE.in: slow start, fast end)
+  const base = cameraAt(f);
+  const tipW = W(a.fingertips[TIP]);
+  // aim: the tip is centred by the hand-off; zoom: log-space, accelerating (x6 by
+  // macroIn + 8, ~x2.7 at macroIn: the tip is ~150 px wide when the macro pad takes over)
+  const aimT = tween(f, B.pushIn, B.macroIn + 2, [0, 1], io);
+  const zT = Math.min(1, Math.max(0, (f - B.pushIn) / (B.macroIn + 8 - B.pushIn)));
+  const look = lerpPt(base, tipW, aimT);
+  const zoom = base.zoom * Math.pow(6, Math.pow(zT, 1.6));
+  const cam = { zoom, x: look.x, y: look.y };
+  const blur = tween(f, B.macroIn - 4, B.macroIn + 13, [0, 12], EASE.in);
+  const opacity = 1 - tween(f, B.macroIn + 3, B.macroIn + 18, [0, 1], io); // gentle: the macro world is darker
 
-  const pose: FetusPose = {
-    curl: 0.5 + 0.02 * nz("curl", f, 0.01),
-    headTilt: 1.3 * nz("ht", f) + 1.4 * suck - 2.5 * up * (1 - rel),
-    armPose: { rest: 1 - suckW, thumbSuck: suckW },
-    armSway: 2 * nz("as", f) * (1 - 0.6 * suckW) + 1.2 * suck - 18 * rel, // released: the hand floats forward, off the face
-    handOpen: clamp(handOpen + 0.04 * nz("ho", f, 0.05)),
-    toesCurl: [0, 1, 2, 3, 4].map((i) => 0.15 + 0.15 * nz(`t${i}`, f, 0.03)),
-  };
-
-  // --- the fetus drifts gently in the fluid
-  const at: Pt = {
-    x: FETUS_AT.x + 6 * nz("fx", f, 0.008),
-    y: FETUS_AT.y + 7 * nz("fy", f, 0.008) + 3 * Math.sin(f * 0.06),
-  };
-  const a = fetusAnchors(week, pose, size);
-  const tipW = add(at, a.fingertips[TIP]);
-
-  // --- camera: body (X-ray) -> mouth + hand (thumb) -> one fingertip
-  const wSuck = tween(f, after(B.xrayOff, -0.3), after(B.thumbIn, 0.2), [0, 1], io);
-  const wTip = tween(f, B.pushIn, after(B.macroIn, 0.4), [0, 1], EASE.in);
-  const body = add(at, { x: 6, y: -6 });
-  const look = lerpPt(lerpPt(body, SUCK_REF, wSuck), tipW, wTip);
-  const zoom =
-    lerp(1, 1.24, tween(f, 0, B.xrayOff, [0, 1], io)) *
-    lerp(1, 1.3, wSuck) *
-    lerp(1, 1.04, tween(f, B.thumbIn, B.pushIn, [0, 1], io)) *
-    lerp(1, 5.2, wTip);
-  const blur = tween(f, after(B.macroIn, -0.15), after(B.macroIn, 0.42), [0, 12], EASE.in);
-  const opacity = 1 - tween(f, after(B.macroIn, 0.2), after(B.macroIn, 0.5), [0, 1], io);
-
-  // fingertip on screen (camera drift ignored: it is a few px), for the zoom-through
-  const tipS = { x: HERO.cx + (tipW.x - look.x) * zoom, y: HERO.cy + (tipW.y - look.y) * zoom };
+  // fingertip on screen (camera drift ignored: a few px), for the zoom-through
+  const toS = (p: Pt) => worldToScreenCam(cam, p);
+  const tipS = toS(tipW);
   const dirTip = sub(a.fingertips[TIP], a.hand);
   const tipAngle = (Math.atan2(dirTip.y, dirTip.x) * 180) / Math.PI;
   const tipWidth = 0.16 * a.headRadius * zoom;
 
-  return { week, size, sacR, xray, oss, scan, suck, pose, at, a, look, zoom, blur, opacity, tipS, tipAngle, tipWidth };
+  // ---- spotlight (screen-space multiply): C09's face spotlight fading out under the fade
+  // (its curve on its own clock), then back on the mouth + hand for the thumb
+  const carry = 1 - tween(g, 281, 299, [0, 1], io);
+  const onSuck = tween(f, B.faceIn - 6, B.thumbIn - 4, [0, 0.85], io) * (1 - tween(f, B.pushIn, B.macroIn, [0, 1], io));
+  const face = W(lerpPt(a.eye, a.nose, 0.5));
+  const lips = W(lerpPt(a.mouth, a.hand, 0.45));
+  const wS = onSuck / Math.max(1e-6, carry + onSuck);
+  const spotW = lerpPt(face, lips, wS);
+  const spotR = lerp(0.3, 0.19, wS) * r.size * zoom;
+
+  // ---- tracker band (y 100-290): follows the crown in the face close-up
+  const crownY = toS(W(a.crown)).y;
+  const top = Math.min(1, Math.max(0, (300 - crownY) / 110));
+
+  return {
+    f, r, a, W, cam, blur, opacity, xray, oss, scan,
+    tipS, tipAngle, tipWidth,
+    spot: toS(spotW), spotR, spotAmt: Math.max(carry, onSuck), top,
+    hb: heartbeat(g, 160), // C09's constant 160/min, on its clock
+    cheek: toS(W(a.cheek)),
+  };
 };
 
 export type WombTL = ReturnType<typeof wombTimeline>;

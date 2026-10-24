@@ -1,11 +1,13 @@
-// The fetus (shared kit) with everything C09 draws on it: organ glows,
-// the level-up band + halo, the cord to the placenta and the gold
-// highlights. One SVG group in world px (place it inside a <WombLayer>).
+// The fetus (shared kit) with everything C09 draws on it: organ glows, the
+// level-up band + halo, the cord to the placenta and the gold highlights
+// (Scene4's ring / sparkles / face sweep, plus the lid glint that plants C12).
+// One SVG group in world px (place it inside a <WombLayer>).
 import React from "react";
 import { C } from "../../../theme/colors";
 import { Fetus, buildFetus, outFrame } from "../../../shared/fetus";
 import { CordShape, placentaPort } from "../../../shared/womb";
-import { Pt, SAC_C, TL } from "./timeline";
+import { Pt, TL } from "./timeline";
+import { footCentre, handCentre } from "./rig";
 import { BodyDim, OrganDefs, Organs, organLayout } from "./Organs";
 import { LevelUpBand, LevelUpDefs, LevelUpHalo } from "./LevelUp";
 import { FaceSweep, LidGlint, Ring, Sparkles } from "./Highlights";
@@ -33,26 +35,33 @@ const lidSeam = (geo: ReturnType<typeof buildFetus>, toOut: (p: Pt) => Pt): Pt[]
 };
 
 export const Baby: React.FC<{ t: TL; f: number }> = ({ t, f }) => {
-  const { a, size, at } = t;
-  const geo = buildFetus(t.week, t.pose);
+  const { a, r } = t;
+  const { size, at } = r;
+  const z = t.cam.zoom;
+  const geo = buildFetus(r.week, r.pose);
   const fr = outFrame(geo, size);
   const k = size / 470;
+  const S = size / 1000;
   const band = { h: 360 * k, y: a.bounds.y0 - 200 * k + (a.bounds.y1 - a.bounds.y0 + 400 * k) * t.lp };
   const centre = { x: (a.bounds.x0 + a.bounds.x1) / 2, y: (a.bounds.y0 + a.bounds.y1) / 2 };
-  const port = placentaPort({ cx: SAC_C.x, cy: SAC_C.y, r: t.sacR }, -38, 1);
+  const sac = t.look.sac;
+  const port = placentaPort({ cx: sac.cx, cy: sac.cy, r: sac.r }, t.look.placenta.at, t.look.placenta.size);
   const cordTo = { x: port.x - at.x, y: port.y - at.y };
-  const cord =
-    t.cord > 0.005 ? (
-      <g opacity={t.cord}>
-        <CordShape from={a.navel} to={cordTo} slack={0.8} side={1} twist={1} pulse={0.55 * t.cord} bpm={150}
-          width={14 * k + 1} sway={0.8} seed="c09-cord" frame={f} />
-      </g>
-    ) : null;
+  const cord = (
+    <CordShape from={a.navel} to={cordTo} slack={0.85} side={1} twist={1} pulse={0.5} bpm={155}
+      width={14 * k + 1} sway={0.8} seed="c09-cord" frame={f} />
+  );
+  const hc = handCentre(a);
+  const fc = footCentre(a);
+  // twinkles just beyond the tips (not on them: on the round toes they read as beads)
+  const beyond = (c: Pt, pts: Pt[], k2: number) => pts.map((p) => ({ x: c.x + (p.x - c.x) * k2, y: c.y + (p.y - c.y) * k2 }));
+  const tipTw = beyond(hc, a.fingertips, 1.32);
+  const toeTw = beyond(fc, [a.toes[0], a.toes[2], a.toes[4]], 1.45);
   return (
     <g transform={`translate(${at.x} ${at.y})`}>
       <defs>
-        {blur("c09-glow", 9)}
-        {blur("c09-soft", 3, 50)}
+        {blur("c09-glow", 7 / z)}
+        {blur("c09-soft", 2.5 / z, 50)}
         <radialGradient id="c09-facePool">
           <stop offset={0} stopColor={C.gold} stopOpacity={0.3} />
           <stop offset={1} stopColor={C.gold} stopOpacity={0} />
@@ -75,18 +84,19 @@ export const Baby: React.FC<{ t: TL; f: number }> = ({ t, f }) => {
       </defs>
 
       <LevelUpHalo silhouette={geo.silhouette} css={fr.css} halo={t.halo} centre={centre} />
-      <Fetus week={t.week} size={size} pose={t.pose} heartbeat={t.hb} rim={t.rim} bloom={t.bloom} cord={cord} uid="c09" />
+      <Fetus week={r.week} size={size} pose={r.pose} heartbeat={t.hb} rim={t.rim} bloom={t.bloom} cord={cord} uid="c09" />
 
       <BodyDim silhouette={geo.silhouette} css={fr.css} amount={t.dim} bandY={band.y} h={band.h} />
       <Organs t={t} list={organLayout(a, size)} band={band.y} h={band.h} />
       <LevelUpBand bandY={band.y} h={band.h} bandA={t.bandA} />
 
-      <Ring c={a.hand} r={50 * k} p={t.ringHand > 0 ? Math.min(1, t.ringHand * 1.4) : 0} alpha={t.ringHand} />
-      <Sparkles pts={a.fingertips} p={t.ringHand} alpha={t.ringHand} size={8 * k} />
-      <Ring c={a.foot} r={52 * k} p={t.ringFoot > 0 ? Math.min(1, t.ringFoot * 1.4) : 0} alpha={t.ringFoot} />
-      <Sparkles pts={a.toes} p={t.ringFoot} alpha={t.ringFoot} size={7.5 * k} />
-      <FaceSweep profile={a.profile} eye={a.eye} p={t.sweep} glow={t.faceGlow} s={k} />
-      <LidGlint lid={lidSeam(geo, fr.toOut)} p={t.glint} alpha={t.glintA} s={k} />
+      {/* r 100 per 1000: ~38% of the frame width at the zoom-4 close-ups (rule 11) */}
+      <Ring c={hc} r={100 * S} p={Math.min(1, t.ringHand * 1.4)} alpha={t.ringHand} z={z} />
+      <Sparkles pts={tipTw} p={t.ringHand} alpha={t.ringHand} size={15 / z} />
+      <Ring c={fc} r={100 * S} p={Math.min(1, t.ringFoot * 1.4)} alpha={t.ringFoot} z={z} />
+      <Sparkles pts={toeTw} p={t.ringFoot} alpha={t.ringFoot} size={14 / z} />
+      <FaceSweep profile={a.profile} p={t.sweep} glow={t.faceGlow} s={k} z={z} />
+      <LidGlint lid={lidSeam(geo, fr.toOut)} p={t.glint} alpha={t.glintA} z={z} />
     </g>
   );
 };

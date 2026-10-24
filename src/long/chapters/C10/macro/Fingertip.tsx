@@ -24,7 +24,7 @@ const cw = halfWidth(PAD.crease);
 export const Fingertip: React.FC<{ id: string; spec: PrintSpec; st: TipState; frame: number }> = ({ id, spec, st, frame }) => {
   const { place: p, look, dots, glow, ring, lock } = st;
   if (p.opacity <= 0.002) return null;
-  const k = (n: string) => `c10-tip${id}-${n}`;
+  const k = (n: string) => `c10-tip-${id}${n}`;
   const u = (n: string) => `url(#${k(n)})`;
   const core = SOURCES[0];
   return (
@@ -89,7 +89,7 @@ export const Fingertip: React.FC<{ id: string; spec: PrintSpec; st: TipState; fr
               <path d={`M${-cw * 0.8},${PAD.crease + 34} Q0,${PAD.crease + 20} ${cw * 0.8},${PAD.crease + 34}`} fill="none" stroke={C.womb} strokeWidth={6} opacity={0.42} filter={u("fine")} />
               <path d={`M${-cw * 0.9},${PAD.crease + 46} Q0,${PAD.crease + 32} ${cw * 0.9},${PAD.crease + 46}`} fill="none" stroke={C.text} strokeWidth={4} opacity={0.14} filter={u("fine")} />
               {/* lock bloom from the core */}
-              <circle cx={core.x} cy={core.y} r={260} fill={C.gold} opacity={0.22 * lock} filter={u("soft")} />
+              <circle cx={core.x} cy={core.y} r={260} fill={C.gold} opacity={0.34 * lock} filter={u("soft")} />
             </g>
           </svg>
           <RidgeCanvas spec={spec} look={look} frame={frame} glow={glow} />
@@ -116,9 +116,10 @@ export const Fingertip: React.FC<{ id: string; spec: PrintSpec; st: TipState; fr
               <path d={OUT} fill="none" stroke={C.text} strokeWidth={8} opacity={0.18} filter={u("fine")} transform="translate(6 8)" />
             </g>
             {ring > 0 && (
+              // the lock "click": one bright ring pulses out of the core and fades
               <g opacity={1 - ring}>
-                <circle cx={core.x} cy={core.y} r={40 + 400 * ring} fill="none" stroke={C.gold} strokeWidth={30} opacity={0.45} filter={u("soft")} />
-                <circle cx={core.x} cy={core.y} r={40 + 400 * ring} fill="none" stroke={C.text} strokeWidth={4} opacity={0.85} />
+                <circle cx={core.x} cy={core.y} r={40 + 380 * ring} fill="none" stroke={C.gold} strokeWidth={44} opacity={0.5} filter={u("soft")} />
+                <circle cx={core.x} cy={core.y} r={40 + 380 * ring} fill="none" stroke={C.text} strokeWidth={8} opacity={0.9} />
               </g>
             )}
             {SOURCES.map((q, i) =>
@@ -148,13 +149,13 @@ export const GhostFinger: React.FC<{ place: TipState["place"] }> = ({ place: p }
     >
       <svg viewBox={`${VB.x} ${VB.y} ${VB.w} ${VB.h}`} style={{ ...svgAbs, WebkitMaskImage: fadeMask, maskImage: fadeMask }}>
         <defs>
-          <linearGradient id="c10-ghost" x1="0" y1="0" x2="1" y2="0.4">
+          <linearGradient id="c10-tip-ghost" x1="0" y1="0" x2="1" y2="0.4">
             <stop offset={0} stopColor={C.skinShade} />
             <stop offset={0.6} stopColor={C.womb} />
             <stop offset={1} stopColor={C.wombDeep} />
           </linearGradient>
         </defs>
-        <path d={OUT} fill="url(#c10-ghost)" opacity={0.75} />
+        <path d={OUT} fill="url(#c10-tip-ghost)" opacity={0.75} />
       </svg>
     </div>
   );

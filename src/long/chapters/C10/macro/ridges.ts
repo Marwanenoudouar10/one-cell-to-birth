@@ -117,7 +117,7 @@ export const rasterize = (fd: Field, spec: PrintSpec, L: RidgeLook, out: Uint8Cl
   out.fill(0);
   const { n, pix, mask, own, d, F } = fd;
   const AA = (TAU / LAMBDA) * 1.25;
-  const spiralW = smoothstep(0.78, 1, L.settle);
+  const spiralW = smoothstep(0.5, 1, L.settle); // B's 2-arm twist eases in over ~8 frames (no snap)
   for (let j = 0; j < n; j++) {
     const o = own[j];
     const e = L.R[o] - d[4 * j + 3];

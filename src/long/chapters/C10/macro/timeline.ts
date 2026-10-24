@@ -92,7 +92,7 @@ export const macroTimeline = (f: number, tipS: Pt, tipAngle: number, tipWidth: n
 
   // whole macro world: fades in with the pad, slow push + drift
   const world = {
-    opacity: tween(f, after(B.macroIn, 0.05), after(B.macroIn, 0.4), [0, 1], io),
+    opacity: tween(f, after(B.macroIn, 0.03), after(B.macroIn, 0.6), [0, 1], io), // an even dissolve from the bright womb
     push: lerp(1, 1.045, tween(f, B.macroIn, B.end, [0, 1], io)),
     bloom: 0.25 * flash(f, B.lockA, 14) + 0.3 * lockB,
     // warm flare that hides the scale-match as we pass into the fingertip

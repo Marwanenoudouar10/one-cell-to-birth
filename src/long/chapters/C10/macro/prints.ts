@@ -1,8 +1,10 @@
 // The two fingerprints. Both start from the SAME three ridge start points
 // (pad centre, tip, crease) and run the same ripple; what differs is how the
 // meeting waves settle. Both end as whorls (identical twins' pattern TYPES are
-// often alike) but visibly different: A is a tall concentric whorl, centred;
-// B a rounder spiral whorl, shifted up-left and tilted, with sharper deltas.
+// often alike) but visibly different: A is a plain whorl, tall concentric ovals,
+// upright and centred; B a double-loop whorl (two interlocking loops: a diagonal
+// S-shaped core), shifted up-left, with sharper deltas. At phone size A reads
+// "upright oval rings", B "a tilted S" (a 1-arm spiral read as round rings, too close).
 import { P, Pt } from "../geom";
 
 export type Core = { c: Pt; hl: number; tilt: number; spiral: number; off: number };
@@ -39,7 +41,7 @@ export const PRINT_A: PrintSpec = {
 
 export const PRINT_B: PrintSpec = {
   id: "B",
-  core: { c: P(-46, -92), hl: 0, tilt: -24, spiral: 1, off: -46 },
+  core: { c: P(-30, -80), hl: 40, tilt: 55, spiral: 2, off: -46 },
   offM: 16,
   offK: -34,
   bow: 0.0015,
