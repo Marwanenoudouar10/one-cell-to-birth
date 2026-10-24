@@ -80,7 +80,7 @@ const a = fetusAnchors(week, pose, 520);          // same week / pose / size as 
 - **Rotation must go through the pose.** Use `pose.rotate` or `mirror`; a rotated parent `<g>` would rotate the lighting too.
 - **No cord.** Chapters supply their own through the `cord` slot.
 
-All files are in `/Users/tandeemwork/birth-teaser/src/shared/fetus/`. Each one has a doc header, and the full API doc is at the top of `index.ts`. The longest file is 138 lines.
+All files are in `src/shared/fetus/`. Each one has a doc header, and the full API doc is at the top of `index.ts`. The longest file is 138 lines.
 
 ## embryo
 
@@ -253,7 +253,7 @@ Entry `src/shared/womb/showcase/entry.tsx`, composition "WombShowcase":
 - frames 180–359: 6s demo (kick, sound waves rippling the sac, camera push)
 - frames 360–419: edge cases (zoom 1.4, `part` split, standalone placenta)
 
-Renders in `/Users/tandeemwork/birth-teaser/out/womb/`:
+Renders in `out/womb/`:
 - `looks.png` (three looks)
 - `looks-vs-teaser.png` (the looks next to the teaser's Scene4)
 - `cmp-mid.png` (full-res mid look vs Scene4)
@@ -350,13 +350,13 @@ export const C05: React.FC = () => { const f = useCurrentFrame(); const w = week
 The chapter-agent guide is `src/long/README.md` (61 lines).
 
 # Showcase renders
-- Full film at 0.25 scale: `/Users/tandeemwork/birth-teaser/out/long-0.25.mp4`, sheets `/Users/tandeemwork/birth-teaser/out/long-0.25-sheet-1.jpg` … `-5.jpg`.
-- Tracker across the whole timeline: `/Users/tandeemwork/birth-teaser/out/long-tracker.mp4`, sheets `/Users/tandeemwork/birth-teaser/out/long-tracker-sheet-1.jpg` … `-4.jpg`.
-- Fast tick, earlier fold version: `/Users/tandeemwork/birth-teaser/out/qa/fast-tick-2.jpg` (one strip every 2 frames). The words-fully-out-before-resize fix landed after this, so it isn't in that strip.
-- DAY → WEEK swap: `/Users/tandeemwork/birth-teaser/out/qa/stage-switch-2.jpg` (one strip per frame).
-- Stage → size switch: `/Users/tandeemwork/birth-teaser/out/qa/stage-to-size-2.jpg` (one strip per frame).
-- Chapter preview test: `/Users/tandeemwork/birth-teaser/out/long-C10-sheet.jpg`; full-resolution frame: `/Users/tandeemwork/birth-teaser/out/long-C08-f200.png`.
-- Showcase entry: `/Users/tandeemwork/birth-teaser/src/long/showcase/entry.tsx` (composition "LongTrackerQA").
+- Full film at 0.25 scale: `out/long-0.25.mp4`, sheets `out/long-0.25-sheet-1.jpg` … `-5.jpg`.
+- Tracker across the whole timeline: `out/long-tracker.mp4`, sheets `out/long-tracker-sheet-1.jpg` … `-4.jpg`.
+- Fast tick, earlier fold version: `out/qa/fast-tick-2.jpg` (one strip every 2 frames). The words-fully-out-before-resize fix landed after this, so it isn't in that strip.
+- DAY → WEEK swap: `out/qa/stage-switch-2.jpg` (one strip per frame).
+- Stage → size switch: `out/qa/stage-to-size-2.jpg` (one strip per frame).
+- Chapter preview test: `out/long-C10-sheet.jpg`; full-resolution frame: `out/long-C08-f200.png`.
+- Showcase entry: `src/long/showcase/entry.tsx` (composition "LongTrackerQA").
 
 # Known limitations
 - **Week counting is mixed.** Days use the teaser rule (`max(1, round(w*7))`, with conception as day 1), but the size table uses pregnancy-app weeks 4–40. The fact-checkers should settle this; the code only reads the tables.

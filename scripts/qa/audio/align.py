@@ -1,5 +1,5 @@
 import array, wave, math
-R='/Users/tandeemwork/birth-teaser/out/'
+R='out/'
 SR=48000
 def read(p):
     w=wave.open(p); ch=w.getnchannels(); n=w.getnframes()

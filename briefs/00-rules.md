@@ -1,6 +1,6 @@
 # Shared rules for every scene (read fully)
 
-Project: /Users/tandeemwork/birth-teaser — Remotion 4.0.534, React 19, TypeScript.
+Project: this repository — Remotion 4.0.534, React 19, TypeScript.
 Film: 30s vertical (1080x1920, 30fps) teaser explaining human development from
 fertilisation to birth. Flat 2D vector style (think Kurzgesagt: clean geometric
 shapes, soft gradients, rim light, inner glow, depth layers). English VO + kinetic
@@ -48,7 +48,7 @@ captions already exist globally. It must look like a top-tier studio made it.
   gradients for glow. A 0.5-scale preview of your whole scene should render in well under 60s.
 
 ## How to check your work (do this repeatedly)
-1. `cd /Users/tandeemwork/birth-teaser && source ~/.nvm/nvm.sh`
+1. `cd <project root> && source ~/.nvm/nvm.sh`
 2. Type errors in YOUR folder: `npx tsc --noEmit 2>&1 | grep "src/scenes/SceneN" || echo clean`
 3. Render: `scripts/preview.sh SceneN` -> out/teaser/SceneN/preview.mp4 + sheet.jpg
    (contact sheet: tile k = frame 15*k, left->right, top->bottom). Read the sheet image.

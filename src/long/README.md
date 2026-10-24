@@ -44,7 +44,7 @@ Everything is data-driven. Read `briefs/00-rules.md` first (style, palette C, mo
 
 ## Check your work (isolated: other chapters' errors cannot break it)
 ```bash
-cd /Users/tandeemwork/birth-teaser && source ~/.nvm/nvm.sh
+cd <project root> && source ~/.nvm/nvm.sh
 npx tsc --noEmit 2>&1 | grep "src/long/chapters/C05" || echo clean
 scripts/long-preview.sh C05 [scale=0.4]  # out/long/C05/preview.mp4 + sheet.jpg (tile k = frame 15k)
 scripts/long-frame.sh C05 0 45 120       # out/long/C05/frames/f45.png ... (cut from the preview mp4)

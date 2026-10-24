@@ -10,3 +10,5 @@ src/long/preview/*.ts
 src/**/_qa*
 src/**/_qa/
 .audio-request-time*
+__pycache__
+*.pyc
