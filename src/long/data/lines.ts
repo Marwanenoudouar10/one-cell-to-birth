@@ -9,7 +9,9 @@
  *
  * line(phrases, emphasis?) builds a line from storyboard phrases [text, from, to?]:
  *   text  = the phrases joined by spaces; start = first `from`; end = last `to` (or `from`)
- *   words = per-word start times; phrases = word index of each phrase start (page breaks)
+ *   words = per-word start times; phrases = word index of each phrase start. These are the
+ *           preferred page breaks (captions/pages.ts) when a sentence is over 2 caption rows:
+ *           a phrase is split where the take has an audible pause, so each page reads whole
  * A one-word phrase without `to` is a word cue: the word appears exactly at `from`.
  */
 import { CHAPTERS, ChapterId, toGlobalSec } from "../chapters";
@@ -48,13 +50,13 @@ const line = (phrases: readonly Phrase[], emphasis?: string[]): LocalLine => {
 
 export const CHAPTER_LINES: Partial<Record<ChapterId, LocalLine[]>> = {
   C00: [
-    line([["Have you ever wondered how you began?", 0.4, 2.6]]),
+    line([["Have you ever wondered", 0.4, 1.4], ["how you began?", 1.5, 2.6]]),
     // Accent "you" sits on "you were a single cell" (one gold word, as the gold zygote resolves).
     line([["Long before your first breath,", 3.2, 4.8], ["you were a single cell,", 5.0, 6.2], ["smaller than a grain of salt.", 6.2, 7.6]], ["you"]),
   ],
   C01: [
     line([["It starts with a race.", 0.5, 2.1]]),
-    line([["Hundreds of millions set off on an obstacle course.", 2.5, 5.4]]),
+    line([["Hundreds of millions", 2.5, 3.6], ["set off on an obstacle course.", 3.7, 5.4]]),
     line([["Only one gets in.", 5.9, 7.1]], ["one"]),
   ],
   C02: [
@@ -70,7 +72,8 @@ export const CHAPTER_LINES: Partial<Record<ChapterId, LocalLine[]>> = {
         ["Now a hollow ball,", 0.4, 1.6],
         ["it burrows into the womb wall", 2.0, 3.8],
         ["and sends a message:", 4.0, 5.0],
-        ["the hormone a pregnancy test detects.", 5.2, 7.0],
+        ["the hormone", 5.2, 5.8],
+        ["a pregnancy test detects.", 6.0, 7.0],
       ],
       ["message"],
     ),
@@ -82,7 +85,7 @@ export const CHAPTER_LINES: Partial<Record<ChapterId, LocalLine[]>> = {
     line([["One, lungs and gut.", 6.4, 7.6]]),
   ],
   C06: [
-    line([["Week five:", 0.5, 1.1], ["a tube of heart cells starts to squeeze,", 1.2, 3.0], ["all by itself.", 3.2, 4.1]]),
+    line([["Week five:", 0.5, 1.1], ["a tube of heart cells starts", 1.2, 2.5], ["to squeeze,", 2.6, 3.0], ["all by itself.", 3.2, 4.1]]),
     line([["By week six,", 4.8, 5.6], ["a tiny heart is beating.", 5.7, 7.1]], ["heart"]),
   ],
   C07: [
@@ -110,7 +113,7 @@ export const CHAPTER_LINES: Partial<Record<ChapterId, LocalLine[]>> = {
     ),
   ],
   C11: [
-    line([["Around week twenty,", 3.0, 4.0], ["its mother feels it move for the first time.", 4.1, 6.1]]),
+    line([["Around week twenty,", 3.0, 4.0], ["its mother feels it move", 4.1, 5.0], ["for the first time.", 5.1, 6.1]]),
     line([["A flutter…", 6.5, 7.2], ["then, a kick.", 7.6, 8.5]], ["kick"]),
   ],
   C12: [
@@ -122,7 +125,8 @@ export const CHAPTER_LINES: Partial<Record<ChapterId, LocalLine[]>> = {
     line(
       [
         ["Week thirty:", 3.1, 3.7],
-        ["its brain adds about four teaspoons a week,", 3.8, 5.9],
+        ["its brain", 3.8, 4.3],
+        ["adds about four teaspoons a week,", 4.4, 5.9],
         ["folding as it grows.", 6.1, 7.1],
       ],
       ["brain"],
@@ -136,7 +140,8 @@ export const CHAPTER_LINES: Partial<Record<ChapterId, LocalLine[]>> = {
   C15: [
     line(
       [
-        ["Now it can tell its mother's voice", 0.5, 2.2],
+        ["Now it can tell its mother's", 0.5, 1.9],
+        ["voice", 2.0, 2.2],
         ["from a stranger's,", 2.3, 3.4],
         ["and after birth, it prefers hers.", 3.7, 5.4],
       ],
@@ -148,7 +153,7 @@ export const CHAPTER_LINES: Partial<Record<ChapterId, LocalLine[]>> = {
     line([["Then…", 3.2, 3.7], ["light.", 4.1, 4.6]]),
     line([["A first breath of air.", 5.2, 6.5]]),
     line([["A finger in its palm,", 7.0, 8.1], ["and it holds on tight.", 8.3, 9.5]]),
-    line([["One cell has become a whole new human.", 10.0, 12.9]], ["human"]),
+    line([["One cell has become a whole", 10.0, 11.8], ["new human.", 12.0, 12.9]], ["human"]),
     // The film's last line = the end title (CaptionsLong): 112 px, gold "world.", never fades.
     line([["Hello, world.", 13.6, 14.6]], ["world"]),
   ],

@@ -6,10 +6,11 @@
  *     lines  CaptionLine[] in GLOBAL seconds (captions/types.ts): one per script sentence,
  *            { id, text, start, end, emphasis?, words?, phrases? }
  * Timing rules live in captions/pages.ts:
- *   - no stacked text: a line is fully faded 2 frames before the next line's first word
+ *   - no stacked text: a page is at 0 opacity for 2 clear frames before the next page's
+ *     first word appears (also between pages of one sentence)
  *   - the LAST line is the end title: 112 px, one line, gold last word, never fades out,
  *     slow 4% scale-up + glow to the final frame
- *   - a sentence longer than 3 rows is paged at its spoken phrases
+ *   - a sentence longer than 2 rows (box x 150..930) is paged at its pauses / phrases
  * useCurrentFrame() must be the GLOBAL film frame. Caption block centred on CAPTION_Y.
  */
 import React, { useMemo } from "react";
@@ -20,7 +21,17 @@ import { CAPTION_Y } from "../../theme/layout";
 import { EASE, tween } from "../../lib/ease";
 import { LONG_TOTAL } from "../chapters";
 import { useFontsReady } from "../lib/measure";
-import { CAPTION_LS, CAPTION_SIZE, Page, WORD_GAP, buildPages, clean } from "./captions/pages";
+import {
+  CAPTION_LS,
+  CAPTION_SIZE,
+  CAPTION_X,
+  Page,
+  WORD_GAP,
+  WORD_IN,
+  WORD_LEAD,
+  buildPages,
+  clean,
+} from "./captions/pages";
 import type { CaptionLine } from "./captions/types";
 
 export type { CaptionLine } from "./captions/types";
@@ -40,8 +51,8 @@ const PageView: React.FC<{ page: Page; frame: number; total: number }> = ({ page
       style={{
         position: "absolute",
         top: final ? END_Y : CAPTION_Y,
-        left: final ? 40 : 90,
-        right: final ? 40 : 90,
+        left: final ? 40 : CAPTION_X,
+        right: final ? 40 : CAPTION_X,
         transform: `translateY(calc(-50% + ${lift}px)) scale(${1 + 0.04 * settle})`,
         opacity: out,
         textAlign: "center",
@@ -57,7 +68,7 @@ const PageView: React.FC<{ page: Page; frame: number; total: number }> = ({ page
       }}
     >
       {page.words.map(({ word, at }, i) => {
-        const p = tween(frame, at - 2, at + 8, [0, 1], EASE.out);
+        const p = tween(frame, at - WORD_LEAD, at + WORD_IN, [0, 1], EASE.out);
         const isEmph = page.emphasis.has(clean(word));
         const glow =
           final && isEmph ? `0 0 ${18 + 22 * settle}px ${C.gold}${Math.round(40 + 60 * settle).toString(16)}` : "";

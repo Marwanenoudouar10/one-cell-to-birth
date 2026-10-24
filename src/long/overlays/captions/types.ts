@@ -7,8 +7,8 @@
  *   emphasis  words drawn gold (compared lower-case, letters only); the film's LAST line
  *             defaults to its last word ("world.")
  *   words     each word's start (seconds), same count as text.split(" "); else spread by length
- *   phrases   word indices where a spoken phrase starts; a sentence too long for 3 rows is
- *             paged at these (see captions/pages.ts)
+ *   phrases   word indices where a spoken phrase starts; a sentence too long for 2 rows is
+ *             paged preferably at these, else after punctuation (see captions/pages.ts)
  */
 export type CaptionLine = {
   id: string;
