@@ -29,9 +29,9 @@ export const diveAt = (f: number) => tween(f, T.dive, T.through, [0, 1], Easing.
 
 export const handCamAt = (f: number) => {
   // slow push, already under way at frame 0 (its key sits before the film starts)
-  const push = tween(f, -30, T.began + 8, [1.0, 1.2], Easing.bezier(0.3, 0.05, 0.45, 1));
+  const push = tween(f, -30, T.pushEnd, [1.0, 1.2], Easing.bezier(0.3, 0.05, 0.45, 1));
   // anticipation: the camera eases back a hair before the plunge
-  const breath = tween(f, T.began + 8, T.dive, [0, 1], EASE.inOut);
+  const breath = tween(f, T.pushEnd, T.dive, [0, 1], EASE.inOut);
   const u = diveAt(f);
   const s = (push - 0.018 * breath) * Math.pow(9, u);
   const pan = tween(f, -30, T.dive, [0, 1], EASE.inOut);

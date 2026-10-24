@@ -33,9 +33,10 @@ const xAt = (u: number) => {
 const TRAIL = GAP * 3.4; // px of warm trail behind the counting light
 const R_DOT = 10.5; // day dot radius (about 2.6 px on a 270 px-wide phone)
 
-// The hairline draws along the row (dot units) at a near-even pace, so the
-// dots pop like a count (one every ~1.7 frames), not in one burst.
-const lineAt = (f: number) => tween(f, B.dotsDraw, B.dotsDone, [0, LAST], Easing.bezier(0.3, 0, 0.7, 1));
+// The hairline draws along the row (dot units) at a near-even pace with soft
+// ends, so the dots pop like a count over "they count from" (about one a
+// frame in the 14-frame window, never two at once), not in one burst.
+const lineAt = (f: number) => tween(f, B.dotsDraw, B.dotsDone, [0, LAST], Easing.bezier(0.2, 0.1, 0.8, 0.9));
 const POP_AT = Array.from({ length: DOTS }, (_, i) => {
   for (let t = B.dotsDraw; t < B.dotsDone; t += 0.25) if (lineAt(t) >= i - 0.25) return t;
   return B.dotsDone;
@@ -91,8 +92,11 @@ export const DayDots: React.FC<{ f: number }> = ({ f }) => {
   const line = lineAt(f);
   const u = runAt(f);
   const running = f >= B.runStart && f <= B.conception + 1;
-  const rose = tween(f, B.periodDot - 5, B.periodDot + 3);
+  // inOut, not out: half rose on "the", full on "last" (out put 58 % in one frame, on "from")
+  const rose = tween(f, B.periodDot - 5, B.periodDot + 3, [0, 1], EASE.inOut);
   const rosePulse = Math.exp(-(((f - B.periodDot) / 7) ** 2));
+  // the counting light kindles on dot 1 over 6 frames (no 1-frame pop), as it leaves
+  const lightIn = tween(f, B.runStart, B.runStart + 6, [0, 1], Easing.out(Easing.quad));
   const flare = tween(f, B.conception - 1, B.conception + 2);
   const peak = Math.exp(-Math.max(0, f - B.conception) / 10) * flare;
   const ring = tween(f, B.conception, B.conception + 28, [0, 1], EASE.out);
@@ -116,7 +120,7 @@ export const DayDots: React.FC<{ f: number }> = ({ f }) => {
           <line key={a} x1={a} y1={DOT_Y} x2={b} y2={DOT_Y} stroke={C.peach} strokeOpacity={0.42 * lineFade} strokeWidth={2.4} strokeLinecap="round" />
         ))}
       {running && u > 0.02 && (
-        <g opacity={1 - flare}>
+        <g opacity={lightIn * (1 - flare)}>
           <line x1={Math.max(x0, rx - TRAIL)} y1={DOT_Y} x2={rx} y2={DOT_Y} stroke="url(#c02-trail)" strokeWidth={4.6} strokeLinecap="round" />
           <circle cx={rx} cy={DOT_Y} r={50} fill="url(#c02-dglow)" />
           <circle cx={rx} cy={DOT_Y} r={7} fill={C.text} />

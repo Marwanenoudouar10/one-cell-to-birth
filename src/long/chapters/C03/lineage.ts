@@ -1,5 +1,6 @@
 import { random } from "remotion";
-import { B, GENS, TILT, pitchAt, yawAt } from "./timeline";
+import { GENS, TILT, pitchAt, yawAt } from "./timeline";
+import { LAYOUT } from "./beats";
 import { V3, add3, len3, mul3, norm3, rot, sub3, unrot } from "./geometry";
 
 // (Adapted from the teaser's Scene2.) The family tree of the embryo, computed
@@ -54,10 +55,11 @@ const relax = (ps: V3[], r: number, fill = false) => {
   }
 };
 
-// Split direction: tangential and roughly in the image plane at that moment,
-// so every division reads clearly on screen.
+// Split direction: tangential and roughly in the image plane around the
+// division (view angle at the frozen LAYOUT frame, END contract), so every
+// division reads clearly on screen.
 const splitAxis = (p: V3, g: number, i: number): V3 => {
-  const f = GENS[g - 1].start;
+  const f = LAYOUT.split[g - 3];
   const yaw = yawAt(f);
   const pitch = pitchAt(f);
   const v = rot(p, yaw, pitch);
@@ -78,18 +80,19 @@ const build = (): LCell[][] => {
     brk: Infinity,
   });
   const stages: LCell[][] = [[cell([0, 0, 0], R_STAGE[0], -1)]];
-  // Early stages are staged in VIEW space at their beat, then mapped back to
-  // the tumbling cluster frame, so the camera sees them at their clearest.
+  // Early stages are staged in VIEW space at (about) their beat, then mapped
+  // back to the tumbling cluster frame, so the camera sees them at their
+  // clearest. The frames are the frozen LAYOUT seeds (END contract).
   const atView = (v: V3, f: number) => unrot(v, yawAt(f), pitchAt(f));
   // 2-cell: side by side along the zygote's (tilted) stretch axis, a touch of
   // depth. Only this stage uses TILT: 4..64 are laid out independently.
-  const f2 = B.two;
+  const f2 = LAYOUT.two;
   const t2 = (TILT * Math.PI) / 180;
   const two: V3 = [72 * Math.cos(t2) + 4 * Math.sin(t2), 72 * Math.sin(t2) - 4 * Math.cos(t2), 14];
   stages.push([cell(atView(two, f2), R_STAGE[1], 0), cell(atView(mul3(two, -1), f2), R_STAGE[1], 0)]);
   // 4-cell: a tetrahedron seen down its square axis: four cells in a diamond,
   // one diagonal pair in front (the two second divisions are perpendicular).
-  const f4 = B.four + 4;
+  const f4 = LAYOUT.four;
   const q = 60;
   const c = 30;
   stages.push([

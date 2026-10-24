@@ -19,9 +19,11 @@ export const R0 = 150;
 export const ZR = R0 * 1.17;
 
 // --- morula -> hollow ball -------------------------------------------------
-// The cells flow to their hollow-ball slots between "Now" and "hollow"
-// (stagger survives: the last ring cell lands on B.hollow).
-export const CAV = { start: B.cavity, dur: B.hollow - B.cavity - 6, stagger: 6 };
+// The cells flow to their hollow-ball slots between "Now" and "hollow": on
+// "hollow" the cavity is open and every cell is >= ~80% of the way (reads
+// hollow); the staggered last outer cells settle up to 5 f later (the voice
+// gives only 15 f from "Now" to "hollow", too short for a calm flow).
+export const CAV = { start: B.cavity, dur: B.hollow - B.cavity, stagger: 6 };
 export const cavityOpen = (f: number) => tween(f, CAV.start - 1, B.hollow, [0, 1], EASE.inOut);
 // 0 = gold morula cells, 1 = rose-plum outer shell + bright gold knot.
 export const tint = (f: number) => tween(f, B.cavity + 2, B.knot + 2, [0, 1], EASE.inOut);
@@ -67,13 +69,17 @@ const DIR: Pt = [Math.cos(EXIT), Math.sin(EXIT)];
 const DESC = Easing.bezier(0.3, 0.6, 0.4, 1);
 export const sinkT = (f: number) => tween(f, B.sink, B.closed + 6, [0, 1], EASE.inOut);
 
+// Seed, not a timing: phase of the buried ball's slow bob. Pinned to the
+// value C05's handoff was signed off with (it was B.stick before the
+// 2026-10 voice retime), so the END frame does not move with the beats.
+const BOB_SEED = 85;
 export const ballPos = (f: number): Pt => {
   if (f < B.free) return [CX, CY];
   if (f < B.stick) {
     const u = DESC((f - B.free) / (B.stick - B.free));
     return bez(P_FREE, [P_FREE[0] + DIR[0] * 46, P_FREE[1] + DIR[1] * 46], [P_STICK[0] + 84, P_STICK[1] - 4], P_STICK, u);
   }
-  return [P_STICK[0], lerp(P_STICK[1], Y_BURIED, sinkT(f)) + 2 * Math.sin((f - B.stick) * 0.09)];
+  return [P_STICK[0], lerp(P_STICK[1], Y_BURIED, sinkT(f)) + 2 * Math.sin((f - BOB_SEED) * 0.09) * tween(f, B.stick, B.stick + 12, [0, 1], EASE.inOut)];
 };
 
 // Layout rotation of the hollow ball (radians). It starts with the gold knot

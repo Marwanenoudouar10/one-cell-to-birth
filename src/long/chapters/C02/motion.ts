@@ -44,7 +44,10 @@ export const camAt = (f: number) => {
     1 +
     0.04 * tween(f, 0, B.pushPeak, [0, 1], EASE.inOut) -
     0.04 * tween(f, B.pushPeak, B.endHold, [0, 1], EASE.inOut);
-  const env = tween(f, 6, 40, [0, 1], EASE.inOut) * (1 - tween(f, B.dotsFade - 10, B.endHold, [0, 1], EASE.inOut));
+  // drift eases in with the handoff (frames 6..40), out before END
+  const env =
+    tween(f, B.handoff - 3, B.handoff + 31, [0, 1], EASE.inOut) *
+    (1 - tween(f, B.dotsFade - 10, B.endHold, [0, 1], EASE.inOut));
   const t = f * 0.011;
   return { z, dx: noise2D("c02-cx", t, 0) * 4 * env, dy: noise2D("c02-cy", 0, t) * 4 * env };
 };

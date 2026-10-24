@@ -80,10 +80,16 @@ const angDiff = (a: number, b: number) => {
   return d;
 };
 
-// Outermost cells (as seen when the cavity opens) become the ring; the rest
-// gather into the knot. Positions are compared in the slot frame.
+// Outermost cells (as seen in the tumble pose of frame LAYOUT_SEED) become the
+// ring; the rest gather into the knot. Positions are compared in the slot frame.
+// LAYOUT_SEED is a seed, not a timing: which cell takes which slot sets the
+// END frame C05 is matched to (draw order, wobble seeds, nuclei), so it stays
+// pinned to the pose it was signed off with (B.cavity before the 2026-10 voice
+// retime) whenever the cavity beat moves. Cost of the 22 f tumble since then:
+// mean travel 56 -> 61 px.
+const LAYOUT_SEED = 12;
 const assign = (): Slot[] => {
-  const f0 = CAV.start;
+  const f0 = LAYOUT_SEED;
   const cells = MORULA.map((p, i) => {
     const v = project(rot(p, yawAt(f0), pitchAt(f0)));
     const [x, y] = rot2(v.x, v.y, -ROLL0);

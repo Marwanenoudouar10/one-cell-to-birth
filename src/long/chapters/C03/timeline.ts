@@ -33,11 +33,11 @@ export const breathAt = (f: number) =>
 export type Gen = { start: number; dur: number; jitter: number };
 export const GENS: Gen[] = [
   { start: B.furrow, dur: B.two - 2 - B.furrow, jitter: 0 }, // 1 -> 2  hero split: pinches on "becomes", pops just before "two"
-  { start: B.four - 9, dur: 7, jitter: 2 }, // 2 -> 4  2-cell holds 12 f, then splits slightly out of step, all four apart on "four"
+  { start: B.four - 9, dur: 7, jitter: 2 }, // 2 -> 4  2-cell holds 14 f, then splits slightly out of step, all four apart on "four"
   { start: B.eight - 11, dur: 8, jitter: 4 }, // 4 -> 8  5-, 6-, 7-cell moments, eight on "eight"
   { start: B.sixteen - 6, dur: 6, jitter: 3 }, // 8 -> 16 the quick one
-  { start: B.each, dur: 6, jitter: 5 }, // 16 -> 32
-  { start: B.smaller - 12, dur: 6, jitter: 5 }, // 32 -> 64 lands on "smaller"
+  { start: B.each, dur: 6, jitter: 3 }, // 16 -> 32 on "each"
+  { start: B.smaller - 8, dur: 5, jitter: 3 }, // 32 -> 64 complete on "smaller" (32-cell holds 12 f)
 ];
 export const G1 = { start: GENS[0].start, brk: GENS[0].start + GENS[0].dur };
 
@@ -79,7 +79,7 @@ export const grainsOp = (f: number) => 1 - tween(f, B.settled - 4, G1.start + 10
 
 // Pronuclei -> one shared chromosome plate -> two sets pulled apart.
 export const PN = {
-  meet0: B.furrow - 22, // pronuclei slide together, envelopes dissolve (on "cell")
+  meet0: B.furrow - 22, // pronuclei slide together, envelopes dissolve (over "One cell")
   meet1: B.furrow - 10,
   plate0: B.furrow - 16, // chromosomes gather on one plate (both tints), spindle forms
   plate1: B.furrow - 6,

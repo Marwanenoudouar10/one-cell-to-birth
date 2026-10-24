@@ -27,6 +27,25 @@ const jit = (n: number, j: number) => ({
 
 const slot = (n: number, j: number): Pt => [540 + xAt(n, j), ROW_Y + jit(n, j).y];
 
+// Dot j of generation g (2^g dots) in the row, before its flight. Each split
+// adds its own spring on top of its parent's, so a child starts exactly where
+// its parent is drawn: the voice leaves 6-7 f per generation, less than the
+// spring needs to settle (11 f), and the parent's overshoot simply carries on
+// instead of snapping back to its slot. Size eases from parent to child too.
+const rowAt = (g: number, j: number, f: number): { p: Pt; s: number } => {
+  let p = slot(1, 0);
+  let s = jit(1, 0).s;
+  for (let k = 1; k <= g; k++) {
+    const jk = j >> (g - k);
+    const a = slot(2 ** (k - 1), jk >> 1);
+    const b = slot(2 ** k, jk);
+    const v = spring({ frame: f - GENS[k], fps: FPS, config: SPLIT });
+    p = [p[0] + (b[0] - a[0]) * v, p[1] + (b[1] - a[1]) * v];
+    s += (jit(2 ** k, jk).s - jit(2 ** (k - 1), jk >> 1).s) * Math.min(1, v);
+  }
+  return { p, s };
+};
+
 // The first dot is the message itself: it rises out of the buried ball's
 // outer cells, up through the lining, and settles under the strip on "hormone".
 const RISE = 14;
@@ -52,7 +71,6 @@ export const HormoneDots: React.FC<{ f: number }> = ({ f }) => {
   if (g < 0) return null;
   const n = 2 ** g;
   const t0 = GENS[g];
-  const v = spring({ frame: f - t0, fps: FPS, config: SPLIT });
   const pulse = tween(f, t0, t0 + 3, [0, 1], EASE.out) * (1 - tween(f, t0 + 3, t0 + 16, [0, 1], EASE.inOut));
   // Flight into the window: centre dots first, rising then curling in.
   const fly = (j: number, p0: Pt, u: number): Pt => {
@@ -61,12 +79,13 @@ export const HormoneDots: React.FC<{ f: number }> = ({ f }) => {
   };
   const dots = Array.from({ length: n }, (_, j) => {
     const to = slot(n, j);
-    const from = g === 0 ? to : slot(n / 2, j >> 1);
-    const bob = 2.2 * Math.sin(f * 0.09 + j * 1.3);
-    const p0: Pt = [from[0] + (to[0] - from[0]) * v, from[1] + (to[1] - from[1]) * v + bob];
+    const row = rowAt(g, j, f);
+    // Bob phase follows the dot's x (a wave along the row), so a split never jumps it.
+    const bob = 2.2 * Math.sin(f * 0.09 + (row.p[0] - 540) * 0.0224);
+    const p0: Pt = [row.p[0], row.p[1] + bob];
     let p = p0;
     let tail: Pt[] = [];
-    let sc = jit(n, j).s;
+    let sc = row.s;
     let o = 1;
     if (f < B.dot1) {
       const end: Pt = [to[0], to[1] + bob];

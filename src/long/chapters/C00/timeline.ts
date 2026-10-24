@@ -12,6 +12,9 @@ export const LAST = chapterFrames("C00") - 1;
 export const T = {
   ...B,
   last: LAST,
+  // the hand camera's push settles here, then eases back before the plunge.
+  // Keyed off `dive` (not `began`) so the thumbnail (frame 0) never moves.
+  pushEnd: B.dive - 10,
   // the dive
   streaksIn: B.dive + 3,
   handGone: B.through - 1,
@@ -19,7 +22,10 @@ export const T = {
   // the cell
   cellIn: B.through - 4,
   pullBack: B.land + 6,
-  crystalGone: B.away + 13,
+  // the crystal's ease-in exit: still in full view on "salt", and it slides
+  // right just fast enough to stay >= 45 px clear of the cell's glide to C01
+  crystalOut: B.salt - 4,
+  crystalGone: B.salt + 11,
   // C01's opening world
   worldIn: B.rewind + 2,
   worldDone: B.egg + 2,
@@ -73,9 +79,9 @@ export const eggBlurAt = (f: number) => tween(f, T.cellIn, B.resolved - 6, [24, 
 // C01's world (tube walls, corona, its caption shade) fading in.
 export const worldAt = (f: number) => tween(f, T.worldIn, T.worldDone, [0, 1], EASE.inOut);
 
-// Salt crystal: slide in on "smaller", settle, slide away.
+// Salt crystal: slide in on "smaller", settle, glint on "grain", slide away on "salt".
 export const crystalAt = (f: number) => {
   const inn = tween(f, B.smaller - 3, B.land + 4, [0, 1], Easing.bezier(0.2, 0.85, 0.3, 1));
-  const out = tween(f, B.away - 2, T.crystalGone, [0, 1], Easing.bezier(0.5, 0, 0.75, 0.6));
+  const out = tween(f, T.crystalOut, T.crystalGone, [0, 1], Easing.bezier(0.5, 0, 0.75, 0.6));
   return { inn, out, on: inn > 0 && out < 1 };
 };

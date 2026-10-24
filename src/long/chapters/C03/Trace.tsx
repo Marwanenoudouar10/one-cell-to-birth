@@ -13,7 +13,8 @@ const A0 = -90; // starts at the top, runs clockwise
 
 export const traceHead = (f: number) => {
   const p = traceAt(f);
-  const on = tween(f, B.hold + 2, B.hold + 6) * (1 - tween(f, B.grow, B.grow + 12, [0, 1], EASE.inOut));
+  // the head kindles over 6 frames with the trace itself (rule 14: no < 6-frame fade-ins)
+  const on = tween(f, B.hold, B.hold + 6) * (1 - tween(f, B.grow, B.grow + 12, [0, 1], EASE.inOut));
   return { ang: A0 + 360 * p, glint: on, p };
 };
 

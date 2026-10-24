@@ -6,7 +6,7 @@ import { spring } from "remotion";
 import { noise2D } from "@remotion/noise";
 import { EASE, heartbeat, tween } from "../../../lib/ease";
 import { FPS } from "../../../theme/layout";
-import { BEATS as B, BPM, DURATION, LUB, PERIOD } from "./beats";
+import { BEATS as B, BPM, CATCH_UP, CLOCK0, DURATION, LUB, PERIOD } from "./beats";
 import { aliveAt } from "./camera";
 
 export { PERIOD };
@@ -14,7 +14,14 @@ const DUB = 0.26 * PERIOD;
 export const RING_LIFE = 40;
 
 // ---------- Scene3's lub-dub (unchanged maths) ----------
-const beatT = (f: number) => f - B.firstBeat;
+// The beat clock t (frames since heartStarts): 0 at BEATS.firstBeat ("squeeze"),
+// then a little quick until, CATCH_UP frames later, it is the END contract's
+// steady clock f - CLOCK0 (smoothstep: no jump in t or in its speed).
+const CATCH = B.firstBeat - CLOCK0;
+export const beatT = (f: number) => {
+  const u = Math.max(0, Math.min(1, (f - B.firstBeat) / CATCH_UP));
+  return f - B.firstBeat + CATCH * u * u * (3 - 2 * u);
+};
 const raw = (t: number) => (t < 0 ? 0 : heartbeat(t, BPM));
 const envelope = (t: number, release: number, span: number) => {
   let m = 0;
@@ -30,7 +37,7 @@ export const firstBeat = (f: number) => {
 // The lub that lands on "heart" (BEATS.heartWord) beats a little harder: the
 // caption's gold word and the picture's beat arrive together. 0..1, under a beat
 // long: by BEATS.exit it adds < 1% to the pulse, so C07 inherits Scene3's plain beat.
-const ACCENT_N = Math.round((B.heartWord - B.firstBeat - LUB) / PERIOD);
+const ACCENT_N = Math.round((B.heartWord - CLOCK0 - LUB) / PERIOD); // the steady clock (after the catch-up)
 export const accentAt = (f: number) => {
   const t = beatT(f) - ACCENT_N * PERIOD - LUB; // 0 at that lub's peak
   return t < -3 ? 0 : t < 0 ? (t + 3) / 3 : Math.exp(-t / (PERIOD * 0.24));
@@ -109,15 +116,16 @@ export const fillAt = (f: number) => tween(f, B.fillStart, B.fillEnd, [0, 1], EA
 export const ignite = (f: number) => 0.38 * fillAt(f) + 0.62 * tween(f, B.firstBeat, B.firstBeat + 4, [0, 1], EASE.out);
 
 // The squeeze wave along the tube on every beat: u 0 (inflow) .. 1 (outflow),
-// arriving as the lub peaks. The first one is slow and strong.
+// arriving as the lub peaks. The first one is slow and strong. (In clock time t,
+// so it follows the catch-up; before the first beat t = f - firstBeat.)
 export const squeezeAt = (f: number): { u: number; a: number } | null => {
   const t = beatT(f);
   const n = Math.max(0, Math.floor((t + 8) / PERIOD));
   for (const i of [n, n - 1]) {
     if (i < 0) continue;
-    const peak = B.firstBeat + i * PERIOD + LUB;
+    const peak = i * PERIOD + LUB;
     const dur = i === 0 ? 10 : 5.5;
-    const u = (f - (peak - dur)) / (dur + 1);
+    const u = (t - (peak - dur)) / (dur + 1);
     if (u >= 0 && u <= 1.15) return { u: EASE.inOut(Math.min(1, u)), a: (i === 0 ? 1.4 : 1) * Math.min(1, (1.15 - u) / 0.25) };
   }
   return null;
@@ -125,7 +133,7 @@ export const squeezeAt = (f: number): { u: number; a: number } | null => {
 
 // Hand-off in: C05's backdrop gives way to Scene3's womb; the sac resolves around the embryo.
 export const worldAt = (f: number) => tween(f, B.worldIn, B.curlEnd - 10, [0, 1], EASE.inOut);
-export const resolveAt = (f: number) => tween(f, B.zipStart - 2, B.curlEnd - 6, [0, 1], EASE.inOut);
+export const resolveAt = (f: number) => tween(f, B.worldIn + 6, B.curlEnd - 6, [0, 1], EASE.inOut);
 // Hand-off out (rule 5): C07 fades in on top, so rings, glows and the sac's
 // translucent layers fade 1 -> 0 under it while the embryo + yolk stay opaque.
 export const exitAt = (f: number) => tween(f, B.exit, DURATION - 1, [1, 0], (t) => t);

@@ -3,7 +3,7 @@
 // a milky inner glow, soft inner rim light along every facet, faint stepped
 // growth lines on top, the far edges showing through, crisp specular edges,
 // twinkling glitter, a gold bounce from the cell on its left, and a glint that
-// sweeps across it on "salt".
+// sweeps across it on "grain".
 import React from "react";
 import { interpolateColors, random } from "remotion";
 import { C } from "../../../../theme/colors";

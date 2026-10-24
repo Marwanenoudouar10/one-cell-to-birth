@@ -1,5 +1,6 @@
 // "smaller than a grain of salt.": the grain slides in beside the cell while the
-// camera pulls back, tumbles to rest, floats, glints on "salt" and slides away.
+// camera pulls back, tumbles to rest, floats, glints on "grain" and slides away
+// on "salt".
 // It lives in the cell's world: edge = 3x the cell's diameter (salt ~0.3 mm,
 // zygote ~0.1 mm), placed beside it, scaled by the same camera.
 import React from "react";
@@ -25,7 +26,7 @@ export const SaltShot: React.FC<{ frame: number }> = ({ frame }) => {
   const roll = 7 * settle + 1.2 * Math.sin(frame * 0.022 + 2) * float - 9 * st.out;
   const x = cam.x + cam.z * OFF.x + slideIn + slideOut;
   const y = cam.y + cam.z * OFF.y + 4 * Math.sin(frame * 0.05) * float - 30 * settle - 60 * st.out;
-  const glint = tween(frame, T.salt - 4, T.salt + 18, [0, 1], EASE.inOut);
+  const glint = tween(frame, T.grain - 4, T.grain + 18, [0, 1], EASE.inOut);
   return (
     <Crystal
       frame={frame}

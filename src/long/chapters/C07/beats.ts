@@ -4,14 +4,12 @@
 //
 //   > Week seven: its very first move. A tiny wiggle, months before anyone can feel it.
 //
-// Word onsets MEASURED from public/vo/long/C07.wav (clipAt 0.571 s; 10 ms envelope,
-// voiced band < 1.2 kHz vs fricative band > 3.5 kHz; whisper base.en cross-check):
-//   Week 0.68 | seven 0.86 (vowel 1.03) | its 1.76 | very 2.02 | first 2.42 |
-//   move 2.86 || A 3.68 | tiny 3.82 | wiggle 4.10 | months 4.94 | before 5.43 |
-//   anyone 5.80 | can 6.25 | feel 6.44 | it 6.86 (speech ends 6.94)
-// NOTE vo-words.md / voTiming.ts put "it" at 7.30 and the line end at 7.99: that is
-// C08's "Week eight", which bleeds into the tail of C07.wav (7.30-8.04) and is spoken
-// again by C08.wav. Beats follow the real "it" (6.86).
+// Word onsets: REPAIRED clip public/vo/long/C07.wav (2026-10-10 re-cut, C08 bleed removed),
+// chapter-local, from briefs/long/vo-words.md (measured, +-2 frames):
+//   Week 0.69 | seven 0.88 | its 1.78 | very 1.99 | first 2.43 | move 2.86 ||
+//   A 3.69 | tiny 3.82 | wiggle 4.22 | months 4.96 | before 5.45 | anyone 5.80 |
+//   can 6.24 | feel 6.43 | it 6.81 (line ends 6.97)
+// Sync beats sit on their word's frame or 1-3 frames before it (rule 2).
 import { FPS } from "../../../theme/layout";
 import { chapterFrames } from "../../chapters";
 
@@ -24,21 +22,21 @@ export const BEATS = {
   // --- START = C06 END, held still through the fade-in
   fadeEnd: OVERLAP, // free: C06 has faded under us; nothing changed shape before this
   // --- "Week seven:" arm buds lengthen into paddles, the head swells ahead of the body
-  grow: s(0.68), // sync: "Week" (0.68): growth starts (tracker lands W07 by itself)
-  paddle: s(1.03), // sync: "seven" (vowel 1.03): soft glow on the forming arm paddle
-  legPaddle: s(1.4), // free: the leg paddle a beat later
-  grown: s(1.76), // sync: "its" (1.76): paddles formed (kit ~6.85), head swollen
+  grow: s(0.68), // sync: "Week" (0.69, f20.7): growth starts (tracker lands W07 by itself)
+  paddle: s(0.84), // sync: "seven" (0.88, f26.4): soft glow on the forming arm paddle (peaks +2 f)
+  legPaddle: s(1.4), // free: the leg paddle half a second later (16 f after the arm)
+  grown: s(1.76), // sync: "its" (1.78, f53.4): paddles formed (kit ~6.85), head swollen
   // --- "its very first move."
-  spark: s(2.42), // sync: "first" (2.42): a glint runs down the spinal cord, reaching the rump as the bend starts
-  firstMove: s(2.84), // sync: "move" (2.86): the first sideways bend of head + rump
+  spark: s(2.42), // sync: "first" (2.43, f72.9): a glint runs down the spinal cord, reaching the rump as the bend starts
+  firstMove: s(2.84), // sync: "move" (2.86, f85.8): the first sideways bend of head + rump
   // --- "A tiny wiggle,"
-  wiggle: s(4.1), // sync: "wiggle" (4.10): a second, smaller bend (no wind-up: the first
-  //                 move has only just settled), then stillness
+  wiggle: s(4.17), // sync: "wiggle" (4.22, f126.6): a second, smaller bend (no wind-up: the
+  //                 first move settled 13 f earlier), then stillness; its glint leaves on "tiny"
   // --- "months before anyone can feel it."
-  pullBack: s(4.94), // sync: "months" (4.94): camera eases back, the sac small in the womb
+  pullBack: s(4.94), // sync: "months" (4.96, f148.8): camera eases back, the sac small in the womb
   wide: s(6.05), // free (between "anyone" and "can"): wide shot settled, wall + camera still
-  twitch: s(6.42), // sync: "feel" (6.44): one flick inside (peaks 6.63, on "feel"); the wall does not stir
-  pushIn: s(7.05), // free: after "it" (6.86-6.94) and the flick has settled, a slow push-in
+  twitch: s(6.42), // sync: "feel" (6.43, f192.9): one flick inside (peaks 6.63, on "feel"); the wall does not stir
+  pushIn: s(7.05), // free: after "it" (6.81, line ends 6.97) and the flick has settled, a slow push-in
   //                 begins (C08 lands it)
   exit: DURATION - OVERLAP, // free (231): C08 fades in on top; glows/rings fade 1 -> 0
 } as const;
