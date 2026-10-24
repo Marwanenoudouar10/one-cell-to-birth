@@ -12,7 +12,7 @@ import { P2, camAnchors } from "./rig";
 
 export const ANCHOR: P2 = { x: 540, y: 860 };
 const Z0 = 2.85; // medium shot at frame 0
-const Z1 = 3.15; // end of the slow push
+const Z1 = 3.35; // end of the slow push (the ear and the startle read bigger)
 const ZE = 18; // extreme close-up at glideEnd
 const ZEND = 20.5; // creep by the end
 export const EYE_ECU: P2 = { x: 392, y: 800 }; // where the eye sits on screen in the close-up

@@ -41,7 +41,7 @@ export const C12: React.FC = () => {
       <EdgeLight shot={shot} />
       <Vignette shot={shot} />
       <SafeShade />
-      <CaptionShade top={0.3} strength={0.55} />
+      <CaptionShade top={0.3} strength={0.65} />
     </AbsoluteFill>
   );
 };

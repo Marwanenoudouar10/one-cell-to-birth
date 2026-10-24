@@ -16,7 +16,6 @@ export const toWorld = (p: P2): P2 => ({ x: FX + p.x, y: FY + p.y });
 // kit week: follows the tracker (21 -> 27, easing on toward 28 at the end)
 export const kitWeek = (f: number) => Math.max(21, Math.min(28, weekAtLocal("C12", f)));
 
-const spike = (f: number, at: number, decay: number) => (f < at ? 0 : Math.exp(-(f - at) / decay));
 // smooth 0..1..0 bump of `len` frames starting at `at`
 const bump = (f: number, at: number, len: number) => {
   if (f <= at || f >= at + len) return 0;
@@ -24,9 +23,12 @@ const bump = (f: number, at: number, len: number) => {
 };
 
 // startle: quick jolt (head lifts, fingers splay), then settles
+// (3-frame ease-in to the peak on the beat, then an exponential settle)
 export const startleAmt = (f: number) => {
-  const up = Math.min(1, Math.max(0, (f - BEATS.startle + 2) / 2));
-  return up * spike(f, BEATS.startle, 5);
+  const t = f - BEATS.startle;
+  if (t <= -3) return 0;
+  if (t <= 0) return Math.sin((Math.PI / 2) * ((t + 3) / 3));
+  return Math.exp(-t / 6);
 };
 
 // pose WITHOUT the startle (the camera follows this one, so the jolt reads)
@@ -45,13 +47,14 @@ export const poseAt = (f: number, eyeOpen = 0): FetusPose => {
   const b = basePose(f);
   const st = startleAmt(f);
   // random face movements: a lip-corner twitch (not a smile: brief, small)
-  const lip = 0.45 * bump(f, BEATS.lipTwitch, 7) - 0.25 * bump(f, BEATS.lipTwitch + 7, 6);
+  const lip = 0.7 * bump(f, BEATS.lipTwitch, 7) - 0.35 * bump(f, BEATS.lipTwitch + 7, 6);
   return {
     ...b,
-    hiccup: 0.55 * st,
-    headTilt: (b.headTilt ?? 0) - 2.5 * st,
-    handOpen: Math.min(1, (b.handOpen ?? 0.4) + 0.55 * st),
-    armSway: (b.armSway ?? 0) - 7 * st,
+    hiccup: 0.5 * st,
+    curl: 0.5 - 0.04 * st,
+    headTilt: (b.headTilt ?? 0) - 2 * st,
+    handOpen: Math.min(1, (b.handOpen ?? 0.4) + 0.6 * st),
+    armSway: (b.armSway ?? 0) - 10 * st,
     expression: lip,
     eyeOpen,
   };

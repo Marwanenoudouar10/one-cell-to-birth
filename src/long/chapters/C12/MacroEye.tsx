@@ -9,6 +9,7 @@ import { BEATS } from "./beats";
 import { Shot } from "./camera";
 import { Eye, EyeDefs } from "./Eye";
 import { BrowTwitch, EyePatch } from "./EyePatch";
+import { SkinDetail } from "./Skin";
 import { lidOpenAt } from "./eyeShape";
 import { kitGeo } from "./kitGeo";
 import { FX, FY, SIZE, kitWeek, poseAt } from "./rig";
@@ -38,6 +39,7 @@ export const MacroEye: React.FC<{ shot: Shot }> = ({ shot }) => {
         <g transform={fr.css}>
           <EyePatch geo={geo} fr={fr} opacity={fade} headXf={headXf} />
           <g transform={headXf}>
+            <SkinDetail eye={geo.lm.eye} amt={detail * fade} frame={f} />
             <Eye eye={geo.lm.eye} look={{ open, detail, seam, glint, rose, stir: Math.min(1, stir), frame: f }} opacity={fade} />
             <BrowTwitch eye={geo.lm.eye} amt={Math.min(1, brow)} />
           </g>

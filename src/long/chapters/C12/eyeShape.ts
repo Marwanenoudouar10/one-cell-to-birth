@@ -17,14 +17,14 @@ const ramp = (f: number, a: number, b: number, ease = EASE.inOut) =>
 export const lidOpenAt = (f: number) => {
   if (f < BEATS.lidCrack) return 0;
   // a hairline parting that trembles, then the slow, soft opening
-  const crack = 0.075 * ramp(f, BEATS.lidCrack, BEATS.lidOpen, EASE.out);
+  const crack = 0.11 * ramp(f, BEATS.lidCrack, BEATS.lidOpen, EASE.out);
   const tremble = f < BEATS.lidOpen + 6 ? 0.018 * noise2D("c12-trem", f * 0.35, 0) * ramp(f, BEATS.lidCrack, BEATS.lidCrack + 6) : 0;
   const open = ramp(f, BEATS.lidOpen, BEATS.lidOpenFull, (t) => EASE.inOut(t) * 0.7 + EASE.out(t) * 0.3);
   let o = Math.max(0, crack + tremble) * (1 - open) + open;
   // the blink: a soft close, a beat shut, an even softer reopening
   if (f >= BEATS.blinkDown) {
-    const down = ramp(f, BEATS.blinkDown, BEATS.blink, EASE.in);
-    const up = ramp(f, BEATS.blink + 2, BEATS.blinkUp, EASE.out);
+    const down = ramp(f, BEATS.blinkDown, BEATS.blink, EASE.inOut);
+    const up = ramp(f, BEATS.blink + 2, BEATS.blinkUp, EASE.inOut);
     o = 1 - down + up * down;
   }
   // after opening, the lid breathes a hair

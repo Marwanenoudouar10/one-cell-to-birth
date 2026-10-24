@@ -80,7 +80,7 @@ export const BrowTwitch: React.FC<{ eye: { x: number; y: number }; amt: number }
     <g opacity={amt}>
       <ellipse cx={ex + 9} cy={ey - 27} rx={24} ry={9} fill={C.skin} opacity={0.55} filter="url(#c12-soft3)" />
       <path d={`M${ex - 8},${lerp(ey - 32, ey - 35, amt)} Q${ex + 6},${ey - 39} ${ex + 20},${ey - 33}`} fill="none" stroke={C.skinShade}
-        strokeOpacity={0.4} strokeWidth={2.2} strokeLinecap="round" filter="url(#c12-soft1)" />
+        strokeOpacity={0.55} strokeWidth={2.4} strokeLinecap="round" filter="url(#c12-soft1)" />
     </g>
   );
 };

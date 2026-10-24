@@ -15,6 +15,7 @@ const norm = (v: P2) => {
   return { x: v.x / l, y: v.y / l };
 };
 const f2 = (v: number) => v.toFixed(2);
+const GT = 0.32; // glint streak length, fraction of the seam
 
 export type EyeLook = {
   open: number; // 0 sealed .. 1 open
@@ -40,10 +41,10 @@ const Lashes: React.FC<{ e: EyeGeo; open: number; amt: number; stir: number; fra
     const dc = norm({ x: down.x + (0.55 + jit) * T.x, y: down.y + (0.55 + jit) * T.y });
     const dO = norm({ x: up.x + (0.65 + jit) * T.x, y: up.y + (0.65 + jit) * T.y });
     const d = norm({ x: lerp(dc.x, dO.x, open), y: lerp(dc.y, dO.y, open) });
-    const len = (1.3 + 1.5 * Math.sin(Math.PI * Math.min(1, t * 1.1))) * (0.7 + 0.5 * random(`c12-lash${i}`));
+    const len = (1.0 + 1.1 * Math.sin(Math.PI * Math.min(1, t * 1.1))) * (0.7 + 0.5 * random(`c12-lash${i}`));
     const c = { x: b.x + d.x * len * 0.55 + T.x * len * 0.1, y: b.y + d.y * len * 0.55 + T.y * len * 0.1 };
     const tip = { x: b.x + d.x * len + T.x * len * 0.45, y: b.y + d.y * len + T.y * len * 0.45 };
-    return { d: `M${f2(b.x)},${f2(b.y)} Q${f2(c.x)},${f2(c.y)} ${f2(tip.x)},${f2(tip.y)}`, o: 0.32 + 0.22 * random(`c12-lashO${i}`) };
+    return { d: `M${f2(b.x)},${f2(b.y)} Q${f2(c.x)},${f2(c.y)} ${f2(tip.x)},${f2(tip.y)}`, o: 0.24 + 0.18 * random(`c12-lashO${i}`) };
   });
   const lower = Array.from({ length: 7 }, (_, i) => {
     const t = 0.3 + 0.09 * i;
@@ -54,7 +55,7 @@ const Lashes: React.FC<{ e: EyeGeo; open: number; amt: number; stir: number; fra
   return (
     <g fill="none" stroke={C.wombDeep} strokeLinecap="round" opacity={amt}>
       {upper.map((l, i) => (
-        <path key={i} d={l.d} strokeWidth={0.27} strokeOpacity={l.o} />
+        <path key={i} d={l.d} strokeWidth={0.2} strokeOpacity={l.o} />
       ))}
       {lower.map((d, i) => (
         <path key={`l${i}`} d={d} strokeWidth={0.18} strokeOpacity={0.12 * open} />
@@ -75,10 +76,10 @@ export const EyeDefs: React.FC = () => (
       <stop offset={0.55} stopColor={C.bg1} />
       <stop offset={1} stopColor={C.bg0} />
     </radialGradient>
+    {/* dark, neutral slate iris (facts: keep it dark and neutral, never coloured) */}
     <radialGradient id="c12-iris" cx="0.4" cy="0.34" r="0.72">
-      <stop offset={0} stopColor={C.wombDeep} />
-      <stop offset={0.45} stopColor={C.bg2} />
-      <stop offset={0.8} stopColor={C.bg1} />
+      <stop offset={0} stopColor={C.bg2} />
+      <stop offset={0.5} stopColor={C.bg1} />
       <stop offset={1} stopColor={C.bg0} />
     </radialGradient>
   </defs>
@@ -91,7 +92,6 @@ export const Eye: React.FC<{ eye: P2; look: EyeLook; opacity: number }> = ({ eye
   const { x: ex, y: ey } = eye;
   const ir = e.iris;
   const shut = 1 - open;
-  const g = glint >= 0 && glint <= 1 ? e.upperAt(glint) : null;
   const arc = (r: number, a0: number, a1: number) => {
     const p = (a: number) => `${f2(ir.x + r * Math.cos((a * Math.PI) / 180))},${f2(ir.y + r * Math.sin((a * Math.PI) / 180))}`;
     return `M${p(a0)} A${r},${r} 0 0 1 ${p(a1)}`;
@@ -115,16 +115,17 @@ export const Eye: React.FC<{ eye: P2; look: EyeLook; opacity: number }> = ({ eye
             <ellipse cx={ex - 10} cy={ey + 1.2} rx={5} ry={4} fill={C.cell} opacity={0.08} filter="url(#c12-soft1)" />
             <circle cx={ir.x} cy={ir.y} r={e.irisR} fill="url(#c12-iris)" />
             <circle cx={ir.x} cy={ir.y} r={e.irisR - 0.45} fill="none" stroke={C.bg0} strokeOpacity={0.75} strokeWidth={1} />
-            <circle cx={ir.x} cy={ir.y} r={5.2} fill="none" stroke={C.womb} strokeOpacity={0.14} strokeWidth={1.8} filter="url(#c12-soft1)" />
+            <circle cx={ir.x} cy={ir.y} r={5.4} fill="none" stroke={C.cell} strokeOpacity={0.07} strokeWidth={2.2} filter="url(#c12-soft1)" />
             <circle cx={ir.x + 0.3} cy={ir.y + 0.2} r={3.4} fill={C.bg0} opacity={0.88} />
             {/* lid shadow on the eyeball, then the gloss */}
             <path d={e.upper} fill="none" stroke={C.bg0} strokeOpacity={0.6} strokeWidth={6} filter="url(#c12-soft2)" />
             <path d={arc(6.4, 195, 268)} fill="none" stroke={C.text} strokeOpacity={0.15} strokeWidth={1.5} strokeLinecap="round" filter="url(#c12-soft1)" />
             <ellipse cx={ex + 1.5} cy={ey + 4.6} rx={5} ry={1.1} fill={C.rose} opacity={0.1 + 0.32 * rose} filter="url(#c12-soft1)" />
-            <circle cx={ir.x + 3.1} cy={ir.y - 2.8} r={2.3} fill={C.gold} opacity={0.32 + 0.2 * rose} filter="url(#c12-soft1)" />
-            <ellipse cx={ir.x + 3.1} cy={ir.y - 2.8} rx={1.45} ry={1.2} fill={C.gold} opacity={0.95} />
-            <circle cx={ir.x + 3.4} cy={ir.y - 3.05} r={0.55} fill={C.text} opacity={0.9} />
-            <circle cx={ir.x - 2.4} cy={ir.y + 2.7} r={0.5} fill={C.peach} opacity={0.32} />
+            {/* warm amber catch-light: the glowing wall reflected as a soft curved
+                window on the wet cornea (a streak, never a dot: rule 11) */}
+            <path d={arc(5.4, 298, 350)} fill="none" stroke={C.gold} strokeOpacity={0.2 + 0.15 * rose} strokeWidth={2.4} strokeLinecap="round" filter="url(#c12-soft1)" />
+            <path d={arc(5.4, 304, 344)} fill="none" stroke={C.gold} strokeOpacity={0.5 + 0.2 * rose} strokeWidth={0.75} strokeLinecap="round" />
+            <path d={arc(5.5, 312, 334)} fill="none" stroke={C.text} strokeOpacity={0.4} strokeWidth={0.35} strokeLinecap="round" />
             <path d={e.lower} transform="translate(0 -0.35)" fill="none" stroke={C.rose} strokeOpacity={0.55} strokeWidth={1.1} filter="url(#c12-soft1)" />
             <path d={e.lower} transform="translate(0 -0.75)" fill="none" stroke={C.text} strokeOpacity={0.28} strokeWidth={0.4} />
           </g>
@@ -161,10 +162,14 @@ export const Eye: React.FC<{ eye: P2; look: EyeLook; opacity: number }> = ({ eye
           <path d={e.upper} fill="none" stroke={C.gold} strokeOpacity={0.7 * seam * shut} strokeWidth={0.3} strokeLinecap="round" />
         </g>
       )}
-      {g && (
-        <g opacity={Math.sin(Math.PI * glint)}>
-          <circle cx={g.x} cy={g.y} r={4} fill={C.gold} opacity={0.55} filter="url(#c12-soft2)" />
-          <circle cx={g.x} cy={g.y} r={0.9} fill={C.text} opacity={0.95} />
+      {/* the glint runs along the seam, outer -> inner corner, as a short streak
+          (C09's LidGlint; a round spark on the eye would read as a catch-light) */}
+      {glint >= 0 && glint <= 1 && (
+        <g fill="none" strokeLinecap="round" opacity={Math.min(1, 2.2 * Math.sin(Math.PI * glint))}>
+          <path d={e.upper} pathLength={1} stroke={C.gold} strokeWidth={2} strokeDasharray={`${GT} 3`}
+            strokeDashoffset={-(glint * (1 + GT) - GT)} opacity={0.7} filter="url(#c12-soft2)" />
+          <path d={e.upper} pathLength={1} stroke={C.text} strokeWidth={0.45} strokeDasharray={`${GT} 3`}
+            strokeDashoffset={-(glint * (1 + GT) - GT)} opacity={0.95} />
         </g>
       )}
     </g>

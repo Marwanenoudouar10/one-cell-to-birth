@@ -65,7 +65,8 @@ export const Vignette: React.FC<{ shot: Shot }> = ({ shot }) => {
       style={{
         opacity: a,
         mixBlendMode: "multiply",
-        background: `radial-gradient(ellipse 760px 900px at ${EYE_ECU.x + 70}px ${EYE_ECU.y - 30}px, transparent 0%, transparent 46%, ${C.wombDeep}40 72%, ${C.wombDeep}a0 100%)`,
+        // + a top band (rule 8): bright brow skin fills the tracker band up close
+        background: `linear-gradient(180deg, ${C.wombDeep}66 0px, ${C.wombDeep}40 250px, transparent 430px), radial-gradient(ellipse 760px 900px at ${EYE_ECU.x + 70}px ${EYE_ECU.y - 30}px, transparent 0%, transparent 46%, ${C.wombDeep}40 72%, ${C.wombDeep}a0 100%)`,
       }}
     />
   );
